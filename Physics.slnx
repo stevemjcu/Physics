@@ -1,5 +1,4 @@
 <Solution>
   <Project Path="Physics.Demo/Physics.Demo.csproj" Id="31db4e79-56a9-4707-a2c2-0ad55cc700c7" />
-  <Project Path="Physics.Tests/Physics.Tests.csproj" Id="fb904bb8-115f-46e7-aae1-f82e7f3a127f" />
   <Project Path="Physics/Physics.csproj" />
 </Solution>
