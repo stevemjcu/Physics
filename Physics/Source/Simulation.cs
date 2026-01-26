@@ -4,9 +4,11 @@ namespace Physics;
 
 public class Simulation
 {
-    public readonly List<Particle> Particles = [];
-    public readonly List<Constraint> Constraints = [];
-    public readonly int Iterations;
+    public int Iterations { get; init; }
+
+    public List<Particle> Particles { get; set; } = [];
+
+    public List<Constraint> Constraints { get; set; } = [];
 
     public void Step(TimeSpan timestep)
     {
@@ -15,7 +17,7 @@ public class Simulation
         // 1. Integrate positions
         foreach (var it in Particles)
         {
-            it.PrevPosition = it.Position;
+            it.PreviousPosition = it.Position;
             it.Position += it.Velocity * seconds;
         }
 
@@ -27,29 +29,61 @@ public class Simulation
         {
             foreach (var it in Constraints)
             {
-                // TODO
+                it.Project();
             }
         }
 
         // 4. Derive velocities
         foreach (var it in Particles)
         {
-            it.Velocity = (it.Position - it.PrevPosition) / seconds;
+            it.Velocity = (it.Position - it.PreviousPosition) / seconds;
         }
     }
 }
 
 public class Particle
 {
-    public Vector3 Position;
-    public Vector3 PrevPosition;
-    public Vector3 Velocity;
-    public float InverseMass;
+    public Vector3 Position { get; set; }
+
+    public Vector3 PreviousPosition { get; set; }
+
+    public Vector3 Velocity { get; set; }
+
+    public float Mass { get; set; }
 }
 
-public class Constraint
+public abstract class Constraint(List<Particle> particles, float stiffness)
 {
-    public required List<Particle> Particles;
-    public required Func<List<Particle>, float> Error;
-    public float Stiffness;
+    public List<Particle> Particles { get; set; } = particles;
+
+    public float Stiffness { get; set; } = stiffness;
+
+    public abstract float GetError();
+
+    public abstract List<Vector3> GetGradient();
+
+    public float GetScalingFactor()
+    {
+        var gradient = GetGradient();
+        var sum = 0f;
+
+        for (var i = 0; i < Particles.Count; i++)
+        {
+            sum += (1 / Particles[i].Mass) * gradient[i].LengthSquared();
+        }
+
+        return -GetError() / sum;
+    }
+
+    public void Project()
+    {
+        var gradient = GetGradient();
+        var factor = GetScalingFactor();
+
+        for (var i = 0; i < Particles.Count; i++)
+        {
+            var coefficient = Stiffness * factor * (1 / Particles[i].Mass);
+            Particles[i].Position += coefficient * gradient[i];
+        }
+    }
 }
