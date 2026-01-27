@@ -1,35 +1,29 @@
 ﻿using OpenTK.Graphics.OpenGL4;
+using System.Runtime.InteropServices;
 
 namespace Physics.Demo.Graphics;
 
-internal class Buffer
+internal class Buffer<T> where T : unmanaged
 {
-    private readonly int VertexArray; // VAO describes layout
-    private readonly int VertexBuffer; // VBO contains data
+    private readonly int VertexArray; // VAO => layout
+    private readonly int VertexBuffer; // VBO => vertices
 
-    public float[] Vertices { get; }
-
-    public Buffer(IList<float> vertices, IList<int> layout)
+    public Buffer(IList<T> vertices, IList<int> layout)
     {
-        Vertices = [.. vertices];
-        var size = Vertices.Length * sizeof(float);
-
+        var size = Marshal.SizeOf<T>();
         VertexArray = GL.GenVertexArray();
         VertexBuffer = GL.GenBuffer();
 
         GL.BindVertexArray(VertexArray);
         GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBuffer);
-        GL.BufferData(BufferTarget.ArrayBuffer, size, Vertices, BufferUsageHint.DynamicDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Count * size, vertices.ToArray(), BufferUsageHint.DynamicDraw);
 
-        for (var i = 0; i < layout.Count; i++)
+        for (var (i, offset) = (0, 0); i < layout.Count; i++)
         {
-            var count = layout[i];
             var type = VertexAttribPointerType.Float;
-            var stride = 8 * sizeof(float);
-            var offset = i * count;
-
-            GL.VertexAttribPointer(i, count, type, false, stride, offset);
+            GL.VertexAttribPointer(i, layout[i], type, false, size, offset);
             GL.EnableVertexAttribArray(i);
+            offset += layout[i];
         }
     }
 }

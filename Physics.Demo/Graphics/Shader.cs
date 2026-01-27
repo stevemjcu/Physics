@@ -36,7 +36,6 @@ internal class Shader : IDisposable
         {
             var source = File.ReadAllText(it);
             var type = Types[Path.GetExtension(it)];
-
             var shader = CompileShader(source, type);
             shaders.Add(shader);
             GL.AttachShader(program, shader);
@@ -92,8 +91,7 @@ internal class Shader : IDisposable
         for (var i = 0; i < count; i++)
         {
             var key = GL.GetActiveAttrib(program, i, out _, out _);
-            var location = GL.GetAttribLocation(program, key);
-            map[key] = location;
+            map[key] = GL.GetAttribLocation(program, key);
         }
 
         return map;
@@ -107,8 +105,7 @@ internal class Shader : IDisposable
         for (var i = 0; i < count; i++)
         {
             var key = GL.GetActiveUniform(program, i, out _, out _);
-            var location = GL.GetUniformLocation(program, key);
-            map[key] = location;
+            map[key] = GL.GetUniformLocation(program, key); ;
         }
 
         return map;
