@@ -2,44 +2,60 @@
 
 namespace Physics.Demo.Graphics;
 
-public class Shader
+public class Shader : IDisposable
 {
-    private int Handle;
-    private Dictionary<string, int> Attributes = [];
-    private Dictionary<string, int> Uniforms = [];
+    public int Handle;
+    public Dictionary<string, int> Attributes = [];
+    public Dictionary<string, int> Uniforms = [];
 
-    public void Compile(List<(string, ShaderType)> shaders)
+    void IDisposable.Dispose()
     {
-        var handles = new List<int>(shaders.Count);
+        GL.DeleteProgram(Handle);
+        GC.SuppressFinalize(this);
+    }
 
-        foreach (var it in shaders)
+    public Shader(List<string> paths)
+    {
+        Handle = CompileProgram(paths);
+        Attributes = DiscoverAttributes(Handle);
+        Uniforms = DiscoverUniforms(Handle);
+    }
+
+    public static int CompileProgram(List<string> paths)
+    {
+        var program = GL.CreateProgram();
+        var shaders = new List<int>(paths.Count);
+
+        foreach (var it in paths)
         {
-            handles.Add(CompileShader(it.Item1, it.Item2));
+            var source = File.ReadAllText(it);
+            var type = Path.GetExtension(it) switch
+            {
+                "vert" => ShaderType.VertexShader,
+                "frag" => ShaderType.FragmentShader,
+                _ => throw new Exception("Invalid shader!")
+            };
+
+            var shader = CompileShader(source, type);
+            shaders.Add(shader);
+            GL.AttachShader(program, shader);
         }
 
-        Handle = GL.CreateProgram();
-
-        foreach (var it in handles)
-        {
-            GL.AttachShader(Handle, it);
-        }
-
-        GL.LinkProgram(Handle);
-        GL.GetProgram(Handle, GetProgramParameterName.LinkStatus, out var status);
+        GL.LinkProgram(program);
+        GL.GetProgram(program, GetProgramParameterName.LinkStatus, out var status);
 
         if (status == 0)
         {
-            throw new Exception(GL.GetProgramInfoLog(Handle));
+            throw new Exception(GL.GetProgramInfoLog(program));
         }
 
-        foreach (var it in handles)
+        foreach (var it in shaders)
         {
-            GL.DetachShader(Handle, it);
+            GL.DetachShader(program, it);
             GL.DeleteShader(it);
         }
 
-        Attributes = DiscoverAttributes(Handle);
-        Uniforms = DiscoverUniforms(Handle);
+        return program;
     }
 
     private static int CompileShader(string source, ShaderType type)
