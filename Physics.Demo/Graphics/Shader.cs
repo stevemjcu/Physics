@@ -4,21 +4,27 @@ namespace Physics.Demo.Graphics;
 
 public class Shader : IDisposable
 {
-    public int Handle;
-    public Dictionary<string, int> Attributes = [];
-    public Dictionary<string, int> Uniforms = [];
-
-    void IDisposable.Dispose()
+    private static readonly Dictionary<string, ShaderType> Types = new()
     {
-        GL.DeleteProgram(Handle);
-        GC.SuppressFinalize(this);
-    }
+        { "vert", ShaderType.VertexShader },
+        { "frag", ShaderType.FragmentShader }
+    };
+
+    public readonly int Handle;
+    public readonly Dictionary<string, int> Attributes = [];
+    public readonly Dictionary<string, int> Uniforms = [];
 
     public Shader(List<string> paths)
     {
         Handle = CompileProgram(paths);
         Attributes = DiscoverAttributes(Handle);
         Uniforms = DiscoverUniforms(Handle);
+    }
+
+    void IDisposable.Dispose()
+    {
+        GL.DeleteProgram(Handle);
+        GC.SuppressFinalize(this);
     }
 
     public static int CompileProgram(List<string> paths)
@@ -29,12 +35,7 @@ public class Shader : IDisposable
         foreach (var it in paths)
         {
             var source = File.ReadAllText(it);
-            var type = Path.GetExtension(it) switch
-            {
-                "vert" => ShaderType.VertexShader,
-                "frag" => ShaderType.FragmentShader,
-                _ => throw new Exception("Invalid shader!")
-            };
+            var type = Types[Path.GetExtension(it)];
 
             var shader = CompileShader(source, type);
             shaders.Add(shader);
