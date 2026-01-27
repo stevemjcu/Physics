@@ -2,7 +2,7 @@
 
 namespace Physics.Demo.Graphics;
 
-public class Shader : IDisposable
+internal class Shader : IDisposable
 {
     private static readonly Dictionary<string, ShaderType> Types = new()
     {
@@ -10,24 +10,24 @@ public class Shader : IDisposable
         { "frag", ShaderType.FragmentShader }
     };
 
-    public readonly int Handle;
-    public readonly Dictionary<string, int> Attributes = [];
-    public readonly Dictionary<string, int> Uniforms = [];
+    private readonly int Program;
+    private readonly Dictionary<string, int> Attributes = [];
+    private readonly Dictionary<string, int> Uniforms = [];
 
-    public Shader(List<string> paths)
+    public Shader(IList<string> paths)
     {
-        Handle = CompileProgram(paths);
-        Attributes = DiscoverAttributes(Handle);
-        Uniforms = DiscoverUniforms(Handle);
+        Program = CompileProgram(paths);
+        Attributes = DiscoverAttributes(Program);
+        Uniforms = DiscoverUniforms(Program);
     }
 
     void IDisposable.Dispose()
     {
-        GL.DeleteProgram(Handle);
+        GL.DeleteProgram(Program);
         GC.SuppressFinalize(this);
     }
 
-    public static int CompileProgram(List<string> paths)
+    public static int CompileProgram(IList<string> paths)
     {
         var program = GL.CreateProgram();
         var shaders = new List<int>(paths.Count);
@@ -57,6 +57,16 @@ public class Shader : IDisposable
         }
 
         return program;
+    }
+
+    public int GetAttribute(string name)
+    {
+        return Attributes.TryGetValue(name, out var value) ? value : -1;
+    }
+
+    public int GetUniform(string name)
+    {
+        return Uniforms.TryGetValue(name, out var value) ? value : -1;
     }
 
     private static int CompileShader(string source, ShaderType type)
