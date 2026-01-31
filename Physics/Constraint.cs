@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+﻿using OpenTK.Mathematics;
 
 namespace Physics;
 
@@ -8,36 +8,34 @@ public abstract class Constraint(List<Particle> particles, float stiffness)
 
     public float Stiffness { get; set; } = stiffness;
 
-    public abstract float Error { get; }
+    public List<Vector3> Gradient { get; protected set; } = new(particles.Count);
 
-    public abstract List<Vector3> Gradient { get; }
+    public float Error { get; protected set; }
 
     public float ScalingFactor
     {
         get
         {
-            var gradient = Gradient;
             var denominator = 0f;
 
             for (var i = 0; i < Particles.Count; i++)
             {
-                var component = Particles[i].InverseMass * gradient[i].LengthSquared();
-                denominator += component;
+                denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
             }
 
             return -Error / denominator;
         }
     }
 
+    public abstract void Calculate();
+
     public void Project()
     {
-        var gradient = Gradient;
         var factor = Stiffness * ScalingFactor;
 
         for (var i = 0; i < Particles.Count; i++)
         {
-            var correction = factor * Particles[i].InverseMass * gradient[i];
-            Particles[i].Position += correction;
+            Particles[i].Position += factor * Particles[i].InverseMass * Gradient[i];
         }
     }
 }

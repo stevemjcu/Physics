@@ -27,6 +27,7 @@ public class Simulation(int iterations)
         {
             foreach (var it in Constraints)
             {
+                it.Calculate();
                 it.Project();
             }
         }
