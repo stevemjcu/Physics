@@ -2,7 +2,7 @@
 
 namespace Physics.Demo.Graphics;
 
-internal class Shader : IDisposable
+internal class Shader(IList<string> files) : IDisposable
 {
     private static readonly Dictionary<string, ShaderType> Types = new()
     {
@@ -10,29 +10,45 @@ internal class Shader : IDisposable
         { "frag", ShaderType.FragmentShader }
     };
 
-    private readonly int Program;
-    private readonly Dictionary<string, int> Attributes = [];
-    private readonly Dictionary<string, int> Uniforms = [];
+    private readonly IList<string> Files = [.. files];
+    private int Program;
+    private Dictionary<string, int> Attributes = [];
+    private Dictionary<string, int> Uniforms = [];
 
-    public Shader(IList<string> paths)
+    public void Compile()
     {
-        Program = CompileProgram(paths);
+        Program = CompileProgram(Files);
         Attributes = DiscoverAttributes(Program);
         Uniforms = DiscoverUniforms(Program);
     }
 
-    void IDisposable.Dispose()
+    public void Use()
+    {
+        GL.UseProgram(Program);
+    }
+
+    public void Dispose()
     {
         GL.DeleteProgram(Program);
         GC.SuppressFinalize(this);
     }
 
-    public static int CompileProgram(IList<string> paths)
+    public int GetAttribute(string name)
+    {
+        return Attributes.TryGetValue(name, out var value) ? value : -1;
+    }
+
+    public int GetUniform(string name)
+    {
+        return Uniforms.TryGetValue(name, out var value) ? value : -1;
+    }
+
+    private static int CompileProgram(IList<string> files)
     {
         var program = GL.CreateProgram();
-        var shaders = new List<int>(paths.Count);
+        var shaders = new List<int>(files.Count);
 
-        foreach (var it in paths)
+        foreach (var it in files)
         {
             var source = File.ReadAllText(it);
             var type = Types[Path.GetExtension(it)];
@@ -56,16 +72,6 @@ internal class Shader : IDisposable
         }
 
         return program;
-    }
-
-    public int GetAttribute(string name)
-    {
-        return Attributes.TryGetValue(name, out var value) ? value : -1;
-    }
-
-    public int GetUniform(string name)
-    {
-        return Uniforms.TryGetValue(name, out var value) ? value : -1;
     }
 
     private static int CompileShader(string source, ShaderType type)
