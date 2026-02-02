@@ -10,7 +10,7 @@ public class Particle
 
     public Vector3 Velocity { get; set; }
 
-    public float Mass { get; set; }
+    public float InverseMass { get; set; }
 
-    public float InverseMass => (1 / Mass);
+    public float Mass => InverseMass == 0 ? float.PositiveInfinity : 1 / InverseMass;
 }

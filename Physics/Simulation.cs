@@ -8,29 +8,22 @@ public class Simulation(int iterations)
 
     public List<Constraint> Constraints { get; set; } = [];
 
-    public List<Collider> Colliders { get; set; } = [];
-
     public void Step(TimeSpan timestep)
     {
         var seconds = (float)timestep.TotalSeconds;
 
-        // Integrate positions
+        // Integrate particles
         foreach (var it in Particles)
         {
             it.PreviousPosition = it.Position;
             it.Position += it.Velocity * seconds;
         }
 
-        // Detect potential collisions (broad phase)
-        // TODO
+        // Generate collision constraints
 
         // Solve constraints
         for (var i = 0; i < Iterations; i++)
         {
-            // Generate collision constraints (narrow phase)
-            // TODO
-
-            // Project constraints
             foreach (var it in Constraints)
             {
                 it.Calculate();

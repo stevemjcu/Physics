@@ -1,4 +1,4 @@
-﻿namespace Physics;
+﻿namespace Physics.Constraints;
 
 public class DistanceConstraint(
     Particle source, Particle target, float distance, float stiffness)
