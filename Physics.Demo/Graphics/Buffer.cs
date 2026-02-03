@@ -6,10 +6,11 @@ namespace Physics.Demo.Graphics;
 internal class Buffer<T>(int size, IList<int> layout) : IDisposable where T : unmanaged
 {
     private readonly int Stride = Marshal.SizeOf<T>();
-    public readonly T[] Data = [];
 
     private int VertexArray; // VAO = layout
     private int VertexBuffer; // VBO = data
+
+    public T[] Data { get; } = new T[size];
 
     public void Initialize()
     {
@@ -22,15 +23,16 @@ internal class Buffer<T>(int size, IList<int> layout) : IDisposable where T : un
 
         for (var (i, offset) = (0, 0); i < layout.Count; i++)
         {
+            // TODO: Use reflection on T to determine layout, to allow mixed types?
             GL.VertexAttribPointer(i, layout[i], VertexAttribPointerType.Float, false, Stride, offset);
             GL.EnableVertexAttribArray(i);
             offset += layout[i] * sizeof(float);
         }
     }
 
-    public void Flush()
+    public void Flush(int count)
     {
-        GL.BufferSubData(BufferTarget.ArrayBuffer, 0, Data!.Length * Stride, Data);
+        GL.BufferSubData(BufferTarget.ArrayBuffer, 0, count * Stride, Data);
     }
 
     public void Bind()

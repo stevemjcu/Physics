@@ -8,15 +8,13 @@ public class Simulation(int iterations)
 
     public List<Constraint> Constraints { get; set; } = [];
 
-    public void Step(TimeSpan timestep)
+    public void Step(float timestep)
     {
-        var seconds = (float)timestep.TotalSeconds;
-
         // Integrate particles
         foreach (var it in Particles)
         {
             it.PreviousPosition = it.Position;
-            it.Position += it.Velocity * seconds;
+            it.Position += it.Velocity * timestep;
         }
 
         // Generate collision constraints
@@ -34,7 +32,7 @@ public class Simulation(int iterations)
         // Derive velocities
         foreach (var it in Particles)
         {
-            it.Velocity = (it.Position - it.PreviousPosition) / seconds;
+            it.Velocity = (it.Position - it.PreviousPosition) / timestep;
         }
     }
 }

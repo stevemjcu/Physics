@@ -2,22 +2,21 @@
 
 namespace Physics.Demo.Graphics;
 
-internal class Shader(IList<string> files) : IDisposable
+internal class Shader() : IDisposable
 {
-    private static readonly Dictionary<string, ShaderType> Types = new()
+    private static readonly Dictionary<string, ShaderType> ExtensionToType = new()
     {
         { "vert", ShaderType.VertexShader },
         { "frag", ShaderType.FragmentShader }
     };
 
-    private readonly IList<string> Files = [.. files];
     private int Program;
     private Dictionary<string, int> Attributes = [];
     private Dictionary<string, int> Uniforms = [];
 
-    public void Compile()
+    public void Compile(IList<string> files)
     {
-        Program = CompileProgram(Files);
+        Program = CompileProgram(files);
         Attributes = DiscoverAttributes(Program);
         Uniforms = DiscoverUniforms(Program);
     }
@@ -51,7 +50,7 @@ internal class Shader(IList<string> files) : IDisposable
         foreach (var it in files)
         {
             var source = File.ReadAllText(it);
-            var type = Types[Path.GetExtension(it)];
+            var type = ExtensionToType[Path.GetExtension(it)];
             var shader = CompileShader(source, type);
             shaders.Add(shader);
             GL.AttachShader(program, shader);

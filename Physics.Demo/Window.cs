@@ -12,15 +12,16 @@ internal class Window : GameWindow
 {
     private const string PointVertPath = @"Shaders\points.vert";
     private const string PointFragPath = @"Shaders\points.frag";
+    private const int BufferSize = 64;
 
     private const float MouseSensitivity = 0.0015f;
     private const float CameraSpeed = 3.5f;
-
     private const int VerticalFovDeg = 80;
     private const float DepthNear = 0.1f;
     private const float DepthFar = 100f;
 
-    private const int Iterations = 20;
+    private const int PhysicsIterations = 20;
+    private const float PhysicsTimestep = 1 / 60f;
 
     private readonly Simulation Simulation;
     private readonly Camera Camera;
@@ -29,7 +30,7 @@ internal class Window : GameWindow
 
     public Window(GameWindowSettings a, NativeWindowSettings b) : base(a, b)
     {
-        Simulation = new(Iterations);
+        Simulation = new(PhysicsIterations);
         Camera = new()
         {
             VerticalFov = MathHelper.DegreesToRadians(VerticalFovDeg),
@@ -37,8 +38,8 @@ internal class Window : GameWindow
             DepthNear = DepthNear,
             DepthFar = DepthFar
         };
-        Shader = new([PointVertPath, PointFragPath]);
-        Buffer = new(10, [3]);
+        Shader = new();
+        Buffer = new(BufferSize, [3]);
     }
 
     protected override void OnLoad()
@@ -49,14 +50,19 @@ internal class Window : GameWindow
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.DepthTest);
 
-        Shader.Compile();
+        Shader.Compile([PointVertPath, PointFragPath]);
         Buffer.Initialize();
+
+        Camera.Position = new(0, 0, -3);
+        Simulation.Particles.Add(new(Vector3.Zero, Vector3.Zero, 0));
+        Simulation.Particles.Add(new(new(0, 0, 3), Vector3.Zero, 0));
     }
 
     protected override void OnUnload()
     {
         base.OnUnload();
 
+        Buffer.Dispose();
         Shader.Dispose();
     }
 
@@ -74,10 +80,11 @@ internal class Window : GameWindow
             Close();
         }
 
-        UpdateCamera((float)args.Time);
+        UpdateCamera();
+        //Simulation.Step(PhysicsTimestep);
     }
 
-    private void UpdateCamera(float seconds)
+    private void UpdateCamera()
     {
         var rotation = (MouseState.Position - MouseState.PreviousPosition) * MouseSensitivity;
         Camera.Rotation = new(Camera.Rotation.X - rotation.Y, Camera.Rotation.Y - rotation.X, 0);
@@ -91,7 +98,7 @@ internal class Window : GameWindow
             angle *= -1;
         }
 
-        var distance = CameraSpeed * seconds;
+        var distance = CameraSpeed * PhysicsTimestep;
         var x = GetInputAxis(Keys.A, Keys.D);
         var y = GetInputAxis(Keys.LeftControl, Keys.Space);
         var z = GetInputAxis(Keys.W, Keys.S);
@@ -112,16 +119,18 @@ internal class Window : GameWindow
         base.OnRenderFrame(args);
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        var count = Simulation.Particles.Count;
 
-        for (var i = 0; i < Simulation.Particles.Count; i++)
+        for (var i = 0; i < count; i++)
         {
             Buffer.Data[i] = Simulation.Particles[i].Position;
         }
-        Buffer.Flush();
+
+        Buffer.Flush(count);
 
         Shader.Use();
         Buffer.Bind();
-        GL.DrawArrays(PrimitiveType.Points, 0, Simulation.Particles.Count);
+        GL.DrawArrays(PrimitiveType.Points, 0, count);
 
         SwapBuffers();
     }
