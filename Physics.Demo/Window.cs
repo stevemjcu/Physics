@@ -28,7 +28,9 @@ internal class Window : GameWindow
     private readonly Shader Shader;
     private readonly Buffer<Vector3> Buffer;
 
-    public Window(GameWindowSettings a, NativeWindowSettings b) : base(a, b)
+    public Window(
+        GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
+        : base(gameWindowSettings, nativeWindowSettings)
     {
         Simulation = new(PhysicsIterations);
         Camera = new()

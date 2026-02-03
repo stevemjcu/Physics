@@ -1,11 +1,16 @@
 ﻿using OpenTK.Windowing.Desktop;
 using Physics.Demo;
 
-var settings = new NativeWindowSettings()
+var gameWindowSettings = new GameWindowSettings()
 {
-    Title = "LearnOpenTK",
-    ClientSize = new(800, 600)
+    UpdateFrequency = 144
 };
 
-using var window = new Window(GameWindowSettings.Default, settings);
+var nativeWindowSettings = new NativeWindowSettings()
+{
+    Title = "LearnOpenTK",
+    ClientSize = new(800, 600),
+};
+
+using var window = new Window(gameWindowSettings, nativeWindowSettings);
 window.Run();
