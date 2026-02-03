@@ -6,8 +6,8 @@ internal class Shader() : IDisposable
 {
     private static readonly Dictionary<string, ShaderType> ExtensionToType = new()
     {
-        { "vert", ShaderType.VertexShader },
-        { "frag", ShaderType.FragmentShader }
+        { ".vert", ShaderType.VertexShader },
+        { ".frag", ShaderType.FragmentShader }
     };
 
     private int Program;
@@ -34,12 +34,12 @@ internal class Shader() : IDisposable
 
     public int GetAttribute(string name)
     {
-        return Attributes.TryGetValue(name, out var value) ? value : -1;
+        return Attributes.GetValueOrDefault(name, -1);
     }
 
     public int GetUniform(string name)
     {
-        return Uniforms.TryGetValue(name, out var value) ? value : -1;
+        return Uniforms.GetValueOrDefault(name, -1);
     }
 
     private static int CompileProgram(IList<string> files)

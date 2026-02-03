@@ -23,7 +23,7 @@ internal class Buffer<T>(int size, IList<int> layout) : IDisposable where T : un
 
         for (var (i, offset) = (0, 0); i < layout.Count; i++)
         {
-            // TODO: Use reflection on T to determine layout, to allow mixed types?
+            // TODO: Use reflection to determine layout of T, to allow mixed types?
             GL.VertexAttribPointer(i, layout[i], VertexAttribPointerType.Float, false, Stride, offset);
             GL.EnableVertexAttribArray(i);
             offset += layout[i] * sizeof(float);

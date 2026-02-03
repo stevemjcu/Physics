@@ -15,4 +15,13 @@
     <ProjectReference Include="..\Physics\Physics.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Shaders\points.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Shaders\points.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -53,9 +53,10 @@ internal class Window : GameWindow
         Shader.Compile([PointVertPath, PointFragPath]);
         Buffer.Initialize();
 
-        Camera.Position = new(0, 0, -3);
-        Simulation.Particles.Add(new(Vector3.Zero, Vector3.Zero, 0));
-        Simulation.Particles.Add(new(new(0, 0, 3), Vector3.Zero, 0));
+        Camera.Position = new(0, 0, 3);
+        Simulation.Particles.Add(new(new(-1, -1, 0), Vector3.Zero, 0));
+        Simulation.Particles.Add(new(new(1, -1, 0), Vector3.Zero, 0));
+        Simulation.Particles.Add(new(new(0, 1, 0), Vector3.Zero, 0));
     }
 
     protected override void OnUnload()
@@ -80,11 +81,11 @@ internal class Window : GameWindow
             Close();
         }
 
-        UpdateCamera();
+        UpdateCamera((float)args.Time);
         //Simulation.Step(PhysicsTimestep);
     }
 
-    private void UpdateCamera()
+    private void UpdateCamera(float timestep)
     {
         var rotation = (MouseState.Position - MouseState.PreviousPosition) * MouseSensitivity;
         Camera.Rotation = new(Camera.Rotation.X - rotation.Y, Camera.Rotation.Y - rotation.X, 0);
@@ -98,11 +99,11 @@ internal class Window : GameWindow
             angle *= -1;
         }
 
-        var distance = CameraSpeed * PhysicsTimestep;
         var x = GetInputAxis(Keys.A, Keys.D);
         var y = GetInputAxis(Keys.LeftControl, Keys.Space);
         var z = GetInputAxis(Keys.W, Keys.S);
 
+        var distance = CameraSpeed * timestep;
         Camera.Position += new Vector3(x, 0, z) * Matrix3.CreateRotationY(angle) * distance;
         Camera.Position += new Vector3(0, y, 0) * distance;
     }
@@ -119,6 +120,9 @@ internal class Window : GameWindow
         base.OnRenderFrame(args);
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+        var view = Camera.View;
+        var projection = Camera.Projection;
         var count = Simulation.Particles.Count;
 
         for (var i = 0; i < count; i++)
@@ -126,11 +130,13 @@ internal class Window : GameWindow
             Buffer.Data[i] = Simulation.Particles[i].Position;
         }
 
-        Buffer.Flush(count);
-
         Shader.Use();
+        GL.UniformMatrix4(Shader.GetUniform("view"), true, ref view);
+        GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
+
+        Buffer.Flush(count);
         Buffer.Bind();
-        GL.DrawArrays(PrimitiveType.Points, 0, count);
+        GL.DrawArrays(PrimitiveType.LineLoop, 0, count);
 
         SwapBuffers();
     }

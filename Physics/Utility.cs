@@ -4,10 +4,16 @@ namespace Physics;
 
 public static class Utility
 {
-    public static Vector3 GetDirection(Vector3 eulerRotation)
+    public static Vector3 GetDirection(Vector3 rotation)
     {
-        var matrix = Matrix3.CreateFromQuaternion(Quaternion.FromEulerAngles(eulerRotation));
-        return (-Vector3.UnitZ * matrix).Normalized();
+        var rotationX = Matrix3.CreateRotationX(rotation.X);
+        var rotationY = Matrix3.CreateRotationY(rotation.Y);
+        var rotationZ = Matrix3.CreateRotationZ(rotation.Z);
+
+        return (-Vector3.UnitZ * rotationX * rotationY * rotationZ).Normalized();
+
+        //var matrix = Matrix3.CreateFromQuaternion(Quaternion.FromEulerAngles(eulerRotation));
+        //return (-Vector3.UnitZ * matrix).Normalized();
     }
 
     public static bool Overlaps(Ray ray, Sphere sphere, out float distance)
