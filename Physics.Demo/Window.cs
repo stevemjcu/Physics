@@ -13,7 +13,7 @@ internal class Window : GameWindow
 {
     private const string PointVertPath = @"Shaders\points.vert";
     private const string PointFragPath = @"Shaders\points.frag";
-    private const int BufferSize = 64;
+    private const int BufferSize = 16;
 
     private const float MouseSensitivity = 0.0015f;
     private const float CameraSpeed = 3.5f;
@@ -23,7 +23,7 @@ internal class Window : GameWindow
 
     private const int Iterations = 20;
     private const float DampingCoefficient = 0.995f;
-    private const float Gravity = 9.8f;
+    private const float Gravity = 10f;
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
 
@@ -60,7 +60,7 @@ internal class Window : GameWindow
         Shader = new();
         Buffer = new(BufferSize, [3]);
 
-        Grabber = new(new(default, default, 0) { HasGravity = false }, null, 0, 0.5f);
+        Grabber = new(new(default, default, 0) { HasGravity = false }, null, 0, 0.1f);
     }
 
     protected override void OnLoad()
@@ -75,19 +75,16 @@ internal class Window : GameWindow
         Buffer.Initialize();
         Camera.Position = new(0, 0, 3);
 
-        var p0 = new Particle(new(0, 1, 0), Vector3.Zero, 0) { HasGravity = false };
-        var p1 = new Particle(new(1, -2, 0), Vector3.Zero, 1);
-        var p2 = new Particle(new(2, -3, 0), Vector3.Zero, 1);
+        var anchor = new Particle(new(0, 0, 0), Vector3.Zero, 0) { HasGravity = false };
+        Simulation.Particles.Add(anchor);
 
-        var c0 = new DistanceConstraint(p0, p1, 1, 0.5f);
-        var c1 = new DistanceConstraint(p1, p2, 1, 0.5f);
-
-        Simulation.Particles.Add(p0);
-        Simulation.Particles.Add(p1);
-        Simulation.Particles.Add(p2);
-
-        Simulation.Constraints.Add(c0);
-        Simulation.Constraints.Add(c1);
+        for (var i = 1; i < 8; i++)
+        {
+            var p = new Particle(new(0, -i, 0), Vector3.Zero, 1);
+            var c = new DistanceConstraint(Simulation.Particles[i - 1], p, 1, 0.5f);
+            Simulation.Particles.Add(p);
+            Simulation.Constraints.Add(c);
+        }
     }
 
     protected override void OnUnload()
