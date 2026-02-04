@@ -21,7 +21,9 @@ internal class Window : GameWindow
     private const float DepthNear = 0.1f;
     private const float DepthFar = 100f;
 
-    private const int PbdIterations = 20;
+    private const int Iterations = 20;
+    private const float DampingCoefficient = 0.995f;
+    private const float Gravity = 9.8f;
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
 
@@ -37,7 +39,13 @@ internal class Window : GameWindow
         GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
         : base(gameWindowSettings, nativeWindowSettings)
     {
-        Simulation = new(PbdIterations);
+        Simulation = new()
+        {
+            Iterations = Iterations,
+            DampingCoefficient = DampingCoefficient,
+            Gravity = Gravity
+        };
+
         Camera = new()
         {
             VerticalFov = MathHelper.DegreesToRadians(VerticalFovDeg),
@@ -45,6 +53,7 @@ internal class Window : GameWindow
             DepthNear = DepthNear,
             DepthFar = DepthFar
         };
+
         Shader = new();
         Buffer = new(BufferSize, [3]);
     }
@@ -61,12 +70,12 @@ internal class Window : GameWindow
         Buffer.Initialize();
         Camera.Position = new(0, 0, 3);
 
-        var p0 = new Particle(new(0, 1, 0), Vector3.Zero, 0);
-        var p1 = new Particle(new(0, -2, 0), Vector3.Zero, 1);
-        var p2 = new Particle(new(0, -5, 0), Vector3.Zero, 1);
+        var p0 = new Particle(new(0, 1, 0), Vector3.Zero, 0) { HasGravity = false };
+        var p1 = new Particle(new(1, -2, 0), Vector3.Zero, 1);
+        var p2 = new Particle(new(2, -3, 0), Vector3.Zero, 1);
 
-        var c0 = new DistanceConstraint(p0, p1, 1, 0.01f);
-        var c1 = new DistanceConstraint(p1, p2, 1, 0.01f);
+        var c0 = new DistanceConstraint(p0, p1, 1, 0.5f);
+        var c1 = new DistanceConstraint(p1, p2, 1, 0.5f);
 
         Simulation.Particles.Add(p0);
         Simulation.Particles.Add(p1);
@@ -131,6 +140,20 @@ internal class Window : GameWindow
         var distance = CameraSpeed * timestep;
         Camera.Position += new Vector3(x, 0, z) * Matrix3.CreateRotationY(angle) * distance;
         Camera.Position += new Vector3(0, y, 0) * distance;
+
+        if (MouseState.IsButtonPressed(MouseButton.Left))
+        {
+            foreach (var it in Simulation.Particles)
+            {
+                var ray = new Ray(Camera.Position, Camera.Direction);
+                var sphere = new Sphere(it.Position, 0.15f);
+                if (Utility.Overlaps(ray, sphere, out var d))
+                {
+                    Console.WriteLine($"{it.Position}: {d}");
+                }
+
+            }
+        }
     }
 
     private int GetInputAxis(Keys neg, Keys pos)

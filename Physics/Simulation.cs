@@ -1,8 +1,14 @@
-﻿namespace Physics;
+﻿using OpenTK.Mathematics;
 
-public class Simulation(int iterations)
+namespace Physics;
+
+public class Simulation
 {
-    public int Iterations { get; set; } = iterations;
+    public required int Iterations { get; set; } = 20;
+
+    public required float DampingCoefficient { get; set; } = 1;
+
+    public required float Gravity { get; set; }
 
     public List<Particle> Particles { get; set; } = [];
 
@@ -13,6 +19,11 @@ public class Simulation(int iterations)
         // Integrate particles
         foreach (var it in Particles)
         {
+            if (it.HasGravity)
+            {
+                it.Velocity += new Vector3(0, -Gravity, 0) * timestep;
+            }
+
             it.PreviousPosition = it.Position;
             it.Position += it.Velocity * timestep;
         }
@@ -31,7 +42,8 @@ public class Simulation(int iterations)
         // Derive velocities
         foreach (var it in Particles)
         {
-            //it.Velocity = (it.Position - it.PreviousPosition) / timestep;
+            it.Velocity = (it.Position - it.PreviousPosition) / timestep;
+            it.Velocity *= DampingCoefficient;
         }
     }
 }

@@ -13,4 +13,6 @@ public class Particle(Vector3 position, Vector3 velocity, float inverseMass)
     public float InverseMass { get; set; } = inverseMass;
 
     public float Mass => InverseMass == 0 ? float.PositiveInfinity : 1 / InverseMass;
+
+    public bool HasGravity { get; set; } = true;
 }
