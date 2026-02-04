@@ -2,40 +2,37 @@
 
 namespace Physics;
 
-public abstract class Constraint(List<Particle> particles, float stiffness)
+public abstract class Constraint(Particle[] particles, float stiffness)
 {
-    public List<Particle> Particles { get; set; } = particles;
+    public Particle[] Particles { get; set; } = [.. particles];
+
+    protected Vector3[] Gradient { get; set; } = new Vector3[particles.Length];
 
     public float Stiffness { get; set; } = stiffness;
 
-    public List<Vector3> Gradient { get; protected set; } = new(particles.Count);
-
-    public float Error { get; protected set; }
-
-    public float ScalingFactor
+    public void Project()
     {
-        get
+        var (error, gradient) = CalculateError();
+        var factor = CalculateScalingFactor(error, gradient);
+
+        for (var i = 0; i < Particles.Length; i++)
         {
-            var denominator = 0f;
-
-            for (var i = 0; i < Particles.Count; i++)
-            {
-                denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
-            }
-
-            return -Error / denominator;
+            var correction = factor * Stiffness * Particles[i].InverseMass * gradient[i];
+            Particles[i].Position += correction;
         }
     }
 
-    public abstract void Calculate();
+    protected abstract (float Error, Vector3[] Gradient) CalculateError();
 
-    public void Project()
+    protected float CalculateScalingFactor(float Error, Vector3[] Gradient)
     {
-        var factor = Stiffness * ScalingFactor;
+        var denominator = 0f;
 
-        for (var i = 0; i < Particles.Count; i++)
+        for (var i = 0; i < Particles.Length; i++)
         {
-            Particles[i].Position += factor * Particles[i].InverseMass * Gradient[i];
+            denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
         }
+
+        return -Error / denominator;
     }
 }

@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Physics.Constraints;
 using Physics.Demo.Graphics;
 using System.Drawing;
 
@@ -20,8 +21,12 @@ internal class Window : GameWindow
     private const float DepthNear = 0.1f;
     private const float DepthFar = 100f;
 
-    private const int PhysicsIterations = 20;
-    private const float PhysicsTimestep = 1 / 60f;
+    private const int PbdIterations = 20;
+    private const float FixedTimestep = 1 / 60f;
+    private float Accumulator;
+
+    private static readonly Color4 PrimaryColor = Color4.White;
+    private static readonly Color4 SecondaryColor = Color4.Green;
 
     private readonly Simulation Simulation;
     private readonly Camera Camera;
@@ -32,7 +37,7 @@ internal class Window : GameWindow
         GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
         : base(gameWindowSettings, nativeWindowSettings)
     {
-        Simulation = new(PhysicsIterations);
+        Simulation = new(PbdIterations);
         Camera = new()
         {
             VerticalFov = MathHelper.DegreesToRadians(VerticalFovDeg),
@@ -54,11 +59,21 @@ internal class Window : GameWindow
 
         Shader.Compile([PointVertPath, PointFragPath]);
         Buffer.Initialize();
-
         Camera.Position = new(0, 0, 3);
-        Simulation.Particles.Add(new(new(-1, -1, 0), Vector3.Zero, 0));
-        Simulation.Particles.Add(new(new(1, -1, 0), Vector3.Zero, 0));
-        Simulation.Particles.Add(new(new(0, 1, 0), Vector3.Zero, 0));
+
+        var p0 = new Particle(new(0, 1, 0), Vector3.Zero, 0);
+        var p1 = new Particle(new(0, -2, 0), Vector3.Zero, 1);
+        var p2 = new Particle(new(0, -5, 0), Vector3.Zero, 1);
+
+        var c0 = new DistanceConstraint(p0, p1, 1, 0.01f);
+        var c1 = new DistanceConstraint(p1, p2, 1, 0.01f);
+
+        Simulation.Particles.Add(p0);
+        Simulation.Particles.Add(p1);
+        Simulation.Particles.Add(p2);
+
+        Simulation.Constraints.Add(c0);
+        Simulation.Constraints.Add(c1);
     }
 
     protected override void OnUnload()
@@ -83,8 +98,16 @@ internal class Window : GameWindow
             Close();
         }
 
-        UpdateCamera((float)args.Time);
-        //Simulation.Step(PhysicsTimestep);
+        var timestep = (float)args.Time;
+        Accumulator += timestep;
+
+        while (Accumulator > FixedTimestep)
+        {
+            Simulation.Step(FixedTimestep);
+            Accumulator -= FixedTimestep;
+        }
+
+        UpdateCamera(timestep);
     }
 
     private void UpdateCamera(float timestep)
@@ -125,20 +148,34 @@ internal class Window : GameWindow
 
         var view = Camera.View;
         var projection = Camera.Projection;
+        var identity = Matrix4.Identity;
         var count = Simulation.Particles.Count;
 
         for (var i = 0; i < count; i++)
         {
+            // TODO: Interpolate between position and previous position
             Buffer.Data[i] = Simulation.Particles[i].Position;
         }
 
         Shader.Use();
         GL.UniformMatrix4(Shader.GetUniform("view"), true, ref view);
         GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
+        GL.Uniform4(Shader.GetUniform("static_color"), PrimaryColor);
 
         Buffer.Flush(count);
         Buffer.Bind();
-        GL.DrawArrays(PrimitiveType.LineLoop, 0, count);
+
+        GL.PointSize(4.5f);
+        GL.DrawArrays(PrimitiveType.LineStrip, 0, count);
+        GL.DrawArrays(PrimitiveType.Points, 0, count);
+
+        GL.PointSize(2.5f);
+        GL.UniformMatrix4(Shader.GetUniform("view"), true, ref identity);
+        GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref identity);
+        GL.Uniform4(Shader.GetUniform("static_color"), SecondaryColor);
+        Buffer.Data[0] = Vector3.Zero;
+        Buffer.Flush(1);
+        GL.DrawArrays(PrimitiveType.Points, 0, 1);
 
         SwapBuffers();
     }

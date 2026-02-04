@@ -24,7 +24,6 @@ public class Simulation(int iterations)
         {
             foreach (var it in Constraints)
             {
-                it.Calculate();
                 it.Project();
             }
         }
@@ -32,7 +31,7 @@ public class Simulation(int iterations)
         // Derive velocities
         foreach (var it in Particles)
         {
-            it.Velocity = (it.Position - it.PreviousPosition) / timestep;
+            //it.Velocity = (it.Position - it.PreviousPosition) / timestep;
         }
     }
 }
