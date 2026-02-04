@@ -2,7 +2,7 @@
 
 namespace Physics;
 
-public class Particle(Vector3 position, Vector3 velocity, float inverseMass)
+public class Particle(Vector3 position, Vector3 velocity, float mass)
 {
     public Vector3 Position { get; set; } = position;
 
@@ -10,9 +10,9 @@ public class Particle(Vector3 position, Vector3 velocity, float inverseMass)
 
     public Vector3 Velocity { get; set; } = velocity;
 
-    public float InverseMass { get; set; } = inverseMass;
+    public float Mass { get; set; } = mass;
 
-    public float Mass => InverseMass == 0 ? float.PositiveInfinity : 1 / InverseMass;
+    public float InverseMass => 1 / Mass;
 
     public bool HasGravity { get; set; } = true;
 }

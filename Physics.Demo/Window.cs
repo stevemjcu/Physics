@@ -60,7 +60,7 @@ internal class Window : GameWindow
         Shader = new();
         Buffer = new(BufferSize, [3]);
 
-        Grabber = new(new(default, default, 0) { HasGravity = false }, null, 0, 0.1f);
+        Grabber = new(new(default, default, float.PositiveInfinity) { HasGravity = false }, null, 0, 0.1f);
     }
 
     protected override void OnLoad()
@@ -75,7 +75,7 @@ internal class Window : GameWindow
         Buffer.Initialize();
         Camera.Position = new(0, 0, 3);
 
-        var anchor = new Particle(new(0, 0, 0), Vector3.Zero, 0) { HasGravity = false };
+        var anchor = new Particle(new(0, 0, 0), Vector3.Zero, float.PositiveInfinity) { HasGravity = false };
         Simulation.Particles.Add(anchor);
 
         for (var i = 1; i < 8; i++)
