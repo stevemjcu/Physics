@@ -151,7 +151,6 @@ internal class Window : GameWindow
                 {
                     Console.WriteLine($"{it.Position}: {d}");
                 }
-
             }
         }
     }
@@ -174,31 +173,40 @@ internal class Window : GameWindow
         var identity = Matrix4.Identity;
         var count = Simulation.Particles.Count;
 
-        for (var i = 0; i < count; i++)
+        Shader.Use();
+
+        // Draw rope
         {
-            // TODO: Interpolate between position and previous position
-            Buffer.Data[i] = Simulation.Particles[i].Position;
+            GL.PointSize(4.5f);
+            GL.UniformMatrix4(Shader.GetUniform("view"), true, ref view);
+            GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
+            GL.Uniform4(Shader.GetUniform("base_color"), PrimaryColor);
+
+            for (var i = 0; i < count; i++)
+            {
+                // TODO: Interpolate between position and previous position
+                Buffer.Data[i] = Simulation.Particles[i].Position;
+            }
+
+            Buffer.Flush(count);
+            Buffer.Bind();
+
+            GL.DrawArrays(PrimitiveType.LineStrip, 0, count);
+            GL.DrawArrays(PrimitiveType.Points, 0, count);
         }
 
-        Shader.Use();
-        GL.UniformMatrix4(Shader.GetUniform("view"), true, ref view);
-        GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
-        GL.Uniform4(Shader.GetUniform("static_color"), PrimaryColor);
+        // Draw crosshair
+        {
+            GL.PointSize(2.5f);
+            GL.UniformMatrix4(Shader.GetUniform("view"), true, ref identity);
+            GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref identity);
+            GL.Uniform4(Shader.GetUniform("base_color"), SecondaryColor);
 
-        Buffer.Flush(count);
-        Buffer.Bind();
+            Buffer.Data[0] = Vector3.Zero;
+            Buffer.Flush(1);
 
-        GL.PointSize(4.5f);
-        GL.DrawArrays(PrimitiveType.LineStrip, 0, count);
-        GL.DrawArrays(PrimitiveType.Points, 0, count);
-
-        GL.PointSize(2.5f);
-        GL.UniformMatrix4(Shader.GetUniform("view"), true, ref identity);
-        GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref identity);
-        GL.Uniform4(Shader.GetUniform("static_color"), SecondaryColor);
-        Buffer.Data[0] = Vector3.Zero;
-        Buffer.Flush(1);
-        GL.DrawArrays(PrimitiveType.Points, 0, 1);
+            GL.DrawArrays(PrimitiveType.Points, 0, 1);
+        }
 
         SwapBuffers();
     }
