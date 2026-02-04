@@ -6,15 +6,14 @@ public class DistanceConstraint(
     Particle source, Particle target, float distance, float stiffness)
     : Constraint([source, target], stiffness)
 {
-    public float RestDistance { get; set; } = distance;
+    public float Distance { get; set; } = distance;
 
     protected override (float Error, Vector3[] Gradient) CalculateError()
     {
-        var displacement = Particles[1].Position - Particles[0].Position;
+        var displacement = Particles[0].Position - Particles[1].Position;
         var distance = displacement.Length;
 
-        // FIXME: Why is this flipped?
-        var error = RestDistance - distance;
+        var error = distance - Distance;
         Gradient[0] = displacement / distance; // normalized
         Gradient[1] = -Gradient[0];
 
