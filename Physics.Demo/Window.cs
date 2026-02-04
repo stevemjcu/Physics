@@ -35,6 +35,9 @@ internal class Window : GameWindow
     private readonly Shader Shader;
     private readonly Buffer<Vector3> Buffer;
 
+    private readonly DistanceConstraint Grabber;
+    private float GrabberDistance;
+
     public Window(
         GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
         : base(gameWindowSettings, nativeWindowSettings)
@@ -56,6 +59,8 @@ internal class Window : GameWindow
 
         Shader = new();
         Buffer = new(BufferSize, [3]);
+
+        Grabber = new(new(default, default, 0) { HasGravity = false }, null, 0, 0.5f);
     }
 
     protected override void OnLoad()
@@ -117,6 +122,7 @@ internal class Window : GameWindow
         }
 
         UpdateCamera(timestep);
+        UpdateGrabber(timestep);
     }
 
     private void UpdateCamera(float timestep)
@@ -140,18 +146,39 @@ internal class Window : GameWindow
         var distance = CameraSpeed * timestep;
         Camera.Position += new Vector3(x, 0, z) * Matrix3.CreateRotationY(angle) * distance;
         Camera.Position += new Vector3(0, y, 0) * distance;
+    }
 
+    private void UpdateGrabber(float timestep)
+    {
         if (MouseState.IsButtonPressed(MouseButton.Left))
         {
             foreach (var it in Simulation.Particles)
             {
                 var ray = new Ray(Camera.Position, Camera.Direction);
                 var sphere = new Sphere(it.Position, 0.15f);
-                if (Utility.Overlaps(ray, sphere, out var d))
+
+                if (Utility.Overlaps(ray, sphere, out GrabberDistance))
                 {
-                    Console.WriteLine($"{it.Position}: {d}");
+                    Grabber.Particles[1] = it;
+                    Simulation.Particles.Add(Grabber.Particles[0]);
+                    Simulation.Constraints.Add(Grabber);
+
+                    break;
                 }
             }
+        }
+
+        if (MouseState.IsButtonDown(MouseButton.Left))
+        {
+            var arm = Camera.Direction * GrabberDistance;
+            Grabber.Particles[0].Position = Camera.Position + arm;
+        }
+
+        if (MouseState.IsButtonReleased(MouseButton.Left))
+        {
+            Grabber.Particles[1] = null;
+            Simulation.Particles.Remove(Grabber.Particles[0]);
+            Simulation.Constraints.Remove(Grabber);
         }
     }
 
@@ -172,6 +199,11 @@ internal class Window : GameWindow
         var projection = Camera.Projection;
         var identity = Matrix4.Identity;
         var count = Simulation.Particles.Count;
+
+        if (MouseState.IsButtonDown(MouseButton.Left) && Grabber.Particles[1] is not null)
+        {
+            count--;
+        }
 
         Shader.Use();
 
