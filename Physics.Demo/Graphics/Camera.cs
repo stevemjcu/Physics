@@ -22,4 +22,6 @@ internal class Camera
     public Matrix4 View => Matrix4.LookAt(Position, Position + Direction, Vector3.UnitY);
 
     public Matrix4 Projection => Matrix4.CreatePerspectiveFieldOfView(VerticalFov, AspectRatio, DepthNear, DepthFar);
+
+    public Ray Raycast => new(Position, Direction);
 }

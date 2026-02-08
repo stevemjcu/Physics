@@ -36,7 +36,7 @@ internal class Window : GameWindow
     private readonly Buffer<Vector3> Buffer;
 
     private readonly DistanceConstraint Grabber;
-    private float GrabberDistance;
+    private float GrabDistance;
 
     public Window(
         GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
@@ -59,8 +59,7 @@ internal class Window : GameWindow
 
         Shader = new();
         Buffer = new(BufferSize, [3]);
-
-        Grabber = new(new(default, default, float.PositiveInfinity) { HasGravity = false }, null, 0, 0.1f);
+        Grabber = new(new(), null!, 0, 0.1f);
     }
 
     protected override void OnLoad()
@@ -75,13 +74,14 @@ internal class Window : GameWindow
         Buffer.Initialize();
         Camera.Position = new(0, 0, 3);
 
-        var anchor = new Particle(new(0, 0, 0), Vector3.Zero, float.PositiveInfinity) { HasGravity = false };
+        var anchor = new Particle(new(0, 0, 0), Vector3.Zero, float.PositiveInfinity, false);
         Simulation.Particles.Add(anchor);
 
+        var distance = 0.25f;
         for (var i = 1; i < 8; i++)
         {
-            var p = new Particle(new(0, -i, 0), Vector3.Zero, 1);
-            var c = new DistanceConstraint(Simulation.Particles[i - 1], p, 1, 0.5f);
+            var p = new Particle(new(0, -i * distance, 0), Vector3.Zero, 1);
+            var c = new DistanceConstraint(Simulation.Particles[i - 1], p, distance, 0.5f);
             Simulation.Particles.Add(p);
             Simulation.Constraints.Add(c);
         }
@@ -119,7 +119,7 @@ internal class Window : GameWindow
         }
 
         UpdateCamera(timestep);
-        UpdateGrabber(timestep);
+        UpdateGrabber();
     }
 
     private void UpdateCamera(float timestep)
@@ -145,21 +145,17 @@ internal class Window : GameWindow
         Camera.Position += new Vector3(0, y, 0) * distance;
     }
 
-    private void UpdateGrabber(float timestep)
+    private void UpdateGrabber()
     {
         if (MouseState.IsButtonPressed(MouseButton.Left))
         {
             foreach (var it in Simulation.Particles)
             {
-                var ray = new Ray(Camera.Position, Camera.Direction);
-                var sphere = new Sphere(it.Position, 0.15f);
-
-                if (Utility.Overlaps(ray, sphere, out GrabberDistance))
+                if (Utility.Overlaps(Camera.Raycast, new(it.Position, 0.15f), out GrabDistance))
                 {
                     Grabber.Particles[1] = it;
                     Simulation.Particles.Add(Grabber.Particles[0]);
                     Simulation.Constraints.Add(Grabber);
-
                     break;
                 }
             }
@@ -167,13 +163,13 @@ internal class Window : GameWindow
 
         if (MouseState.IsButtonDown(MouseButton.Left))
         {
-            var arm = Camera.Direction * GrabberDistance;
-            Grabber.Particles[0].Position = Camera.Position + arm;
+            var arm = Camera.Position + Camera.Direction * GrabDistance;
+            Grabber.Particles[0].Position = arm;
         }
 
         if (MouseState.IsButtonReleased(MouseButton.Left))
         {
-            Grabber.Particles[1] = null;
+            Grabber.Particles[1] = null!;
             Simulation.Particles.Remove(Grabber.Particles[0]);
             Simulation.Constraints.Remove(Grabber);
         }
