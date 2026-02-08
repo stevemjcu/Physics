@@ -8,7 +8,7 @@ public class DistanceConstraint(
 {
     public float Distance { get; set; } = distance;
 
-    protected override (float Error, Vector3[] Gradient) CalculateError()
+    public override (float Error, Vector3[] Gradient) CalculateError()
     {
         var displacement = Particles[0].Position - Particles[1].Position;
         var distance = displacement.Length;

@@ -17,7 +17,7 @@ internal class Camera
 
     public float DepthFar { get; set; }
 
-    public Vector3 Direction => Utility.GetDirection(Rotation);
+    public Vector3 Direction => Collision.GetDirection(Rotation);
 
     public Matrix4 View => Matrix4.LookAt(Position, Position + Direction, Vector3.UnitY);
 

@@ -2,7 +2,7 @@
 
 namespace Physics;
 
-public static class Utility
+public static class Collision
 {
     public static Vector3 GetDirection(Vector3 rotation)
     {
@@ -11,9 +11,6 @@ public static class Utility
         var rotationZ = Matrix3.CreateRotationZ(rotation.Z);
 
         return (-Vector3.UnitZ * rotationX * rotationY * rotationZ).Normalized();
-
-        //var matrix = Matrix3.CreateFromQuaternion(Quaternion.FromEulerAngles(eulerRotation));
-        //return (-Vector3.UnitZ * matrix).Normalized();
     }
 
     public static bool Overlaps(Ray ray, Sphere sphere, out float distance)

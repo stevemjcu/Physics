@@ -29,9 +29,9 @@ public abstract class Constraint(Particle[] particles, float stiffness)
         }
     }
 
-    protected abstract (float Error, Vector3[] Gradient) CalculateError();
+    public abstract (float Error, Vector3[] Gradient) CalculateError();
 
-    protected float CalculateScalingFactor(float Error, Vector3[] Gradient)
+    public float CalculateScalingFactor(float Error, Vector3[] Gradient)
     {
         var denominator = 0f;
 
