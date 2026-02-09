@@ -2,11 +2,12 @@
 
 namespace Physics.Shapes;
 
-// |P - O|^2 - R^2 = 0
-public record struct Sphere(Vector3 Origin, float Radius)
+// |P - C|^2 - R^2 = 0
+public record struct Sphere(Vector3 Center, float Radius)
 {
     public readonly bool Intersects(Vector3 Point)
     {
-        return (Point - Origin).LengthSquared - Radius * Radius == 0;
+        var value = (Point - Center).LengthSquared - Radius * Radius;
+        return value < float.Epsilon && value > -float.Epsilon;
     }
 }

@@ -76,7 +76,7 @@ internal class Window : GameWindow
         Buffer.Initialize();
         Camera.Position = new(0, 0, 3);
 
-        var anchor = new Particle(new(0, 0, 0), Vector3.Zero, float.PositiveInfinity, false);
+        var anchor = new Particle(Vector3.Zero, Vector3.Zero, float.PositiveInfinity, false);
         Simulation.Particles.Add(anchor);
 
         var distance = 0.25f;

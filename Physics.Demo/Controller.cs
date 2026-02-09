@@ -2,6 +2,7 @@
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Physics.Constraints;
 using Physics.Demo.Graphics;
+using Physics.Shapes;
 
 namespace Physics.Demo;
 
@@ -50,10 +51,11 @@ internal class Controller()
 
             foreach (var it in Simulation.Particles)
             {
-                if (Camera.Ray.Overlaps(new(it.Position, 0.15f), out var d) && d < length)
+                var sphere = new Sphere(it.Position, 0.15f);
+                if (Camera.Ray.Overlaps(sphere, out var t) && t < length)
                 {
                     particle = it;
-                    length = d;
+                    length = t;
                 }
             }
 
