@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using Physics.Shapes;
 using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace Physics.Demo.Graphics;
@@ -23,5 +24,5 @@ internal class Camera
 
     public Matrix4 Projection => Matrix4.CreatePerspectiveFieldOfView(VerticalFov, AspectRatio, DepthNear, DepthFar);
 
-    public Ray Raycast => new(Position, Direction);
+    public Ray Ray => new(Position, Direction);
 }

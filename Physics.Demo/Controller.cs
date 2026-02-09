@@ -50,7 +50,7 @@ internal class Controller()
 
             foreach (var it in Simulation.Particles)
             {
-                if (Collision.Overlaps(Camera.Raycast, new(it.Position, 0.15f), out var d) && d < length)
+                if (Camera.Ray.Overlaps(new(it.Position, 0.15f), out var d) && d < length)
                 {
                     particle = it;
                     length = d;
