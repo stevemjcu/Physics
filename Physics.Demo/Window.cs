@@ -71,6 +71,7 @@ internal class Window : GameWindow
         CursorState = CursorState.Grabbed;
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.DepthTest);
+        GL.Enable(EnableCap.CullFace);
 
         Shader.Compile([PointVertPath, PointFragPath]);
         Buffer.Initialize();
@@ -83,10 +84,15 @@ internal class Window : GameWindow
         for (var i = 1; i < 8; i++)
         {
             var p = new Particle(new(0, -i * distance, 0), Vector3.Zero, 1);
-            var c = new DistanceConstraint(Simulation.Particles[i - 1], p, distance, 0.2f);
+            var z = new DistanceConstraint(Simulation.Particles[i - 1], p, distance, 0.2f);
             Simulation.Particles.Add(p);
-            Simulation.Constraints.Add(c);
+            Simulation.Constraints.Add(z);
         }
+
+        var a = new Particle(new(-1, 1, 1), hasGravity: false);
+        var b = new Particle(new(1, 1, 1), hasGravity: false);
+        var c = new Particle(new(0, 1, -1), hasGravity: false);
+        Simulation.Colliders.Add(new() { Particles = [a, b, c] });
     }
 
     protected override void OnUnload()
@@ -128,10 +134,16 @@ internal class Window : GameWindow
         base.OnRenderFrame(args);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Shader.Use();
+        Buffer.Bind();
 
         var view = Camera.View;
         var projection = Camera.Projection;
         var identity = Matrix4.Identity;
+
+        GL.PointSize(4.5f);
+        GL.UniformMatrix4(Shader.GetUniform("view"), true, ref view);
+        GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
+        GL.Uniform4(Shader.GetUniform("base_color"), PrimaryColor);
 
         foreach (var it in Simulation.Constraints)
         {
@@ -144,23 +156,30 @@ internal class Window : GameWindow
             Buffer.Data[0] = it.Particles[0].Position;
             Buffer.Data[1] = it.Particles[1].Position;
             Buffer.Flush(2);
-            Buffer.Bind();
 
-            GL.PointSize(4.5f);
-            GL.UniformMatrix4(Shader.GetUniform("view"), true, ref view);
-            GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
-            GL.Uniform4(Shader.GetUniform("base_color"), PrimaryColor);
             GL.DrawArrays(PrimitiveType.LineStrip, 0, 2);
             GL.DrawArrays(PrimitiveType.Points, 0, 2);
         }
 
-        Buffer.Data[0] = Vector3.Zero;
-        Buffer.Flush(1);
+        foreach (var it in Simulation.Colliders)
+        {
+            Buffer.Data[0] = it.Particles[0].Position;
+            Buffer.Data[1] = it.Particles[1].Position;
+            Buffer.Data[2] = it.Particles[2].Position;
+            Buffer.Flush(3);
+
+            GL.CullFace(TriangleFace.Front);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        }
 
         GL.PointSize(2.5f);
         GL.UniformMatrix4(Shader.GetUniform("view"), true, ref identity);
         GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref identity);
         GL.Uniform4(Shader.GetUniform("base_color"), SecondaryColor);
+
+        Buffer.Data[0] = Vector3.Zero;
+        Buffer.Flush(1);
+
         GL.DrawArrays(PrimitiveType.Points, 0, 1);
 
         SwapBuffers();

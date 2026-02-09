@@ -8,6 +8,6 @@ public record struct Sphere(Vector3 Center, float Radius)
     public readonly bool Intersects(Vector3 Point)
     {
         var value = (Point - Center).LengthSquared - Radius * Radius;
-        return value < float.Epsilon && value > -float.Epsilon;
+        return MathF.Abs(value) < float.Epsilon;
     }
 }
