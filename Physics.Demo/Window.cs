@@ -27,6 +27,7 @@ internal class Window : GameWindow
 
     private static readonly Color4 PrimaryColor = Color4.White;
     private static readonly Color4 SecondaryColor = Color4.Green;
+    private static readonly Color4 TertiaryColor = Color4.Blue;
 
     private readonly Simulation Simulation;
     private readonly Camera Camera;
@@ -77,22 +78,21 @@ internal class Window : GameWindow
         Buffer.Initialize();
         Camera.Position = new(0, 0, 3);
 
-        var anchor = new Particle(Vector3.Zero, Vector3.Zero, float.PositiveInfinity, false);
-        Simulation.Particles.Add(anchor);
+        var interval = 0.25f;
+        Simulation.Particles.Add(new());
 
-        var distance = 0.25f;
         for (var i = 1; i < 8; i++)
         {
-            var p = new Particle(new(0, -i * distance, 0), Vector3.Zero, 1);
-            var z = new DistanceConstraint(Simulation.Particles[i - 1], p, distance, 0.2f);
+            var p = new Particle(new(0, -i * interval, 0), Vector3.Zero, 1, true);
+            var c = new DistanceConstraint(Simulation.Particles[i - 1], p, interval, 0.2f);
             Simulation.Particles.Add(p);
-            Simulation.Constraints.Add(z);
+            Simulation.Constraints.Add(c);
         }
 
-        var a = new Particle(new(-1, 1, 1), hasGravity: false);
-        var b = new Particle(new(1, 1, 1), hasGravity: false);
-        var c = new Particle(new(0, 1, -1), hasGravity: false);
-        Simulation.Colliders.Add(new() { Particles = [a, b, c] });
+        var u = new Particle(new(-1, 1, 1));
+        var v = new Particle(new(1, 1, 1));
+        var w = new Particle(new(0, 1, -1));
+        Simulation.Colliders.Add(new() { Particles = [u, v, w] });
     }
 
     protected override void OnUnload()
@@ -153,20 +153,22 @@ internal class Window : GameWindow
             }
 
             // TODO: Interpolate between position and previous position
-            Buffer.Data[0] = it.Particles[0].Position;
-            Buffer.Data[1] = it.Particles[1].Position;
-            Buffer.Flush(2);
+            Buffer.Write(it.Particles[0].Position);
+            Buffer.Write(it.Particles[1].Position);
+            Buffer.Flush();
 
             GL.DrawArrays(PrimitiveType.LineStrip, 0, 2);
             GL.DrawArrays(PrimitiveType.Points, 0, 2);
         }
 
+        GL.Uniform4(Shader.GetUniform("base_color"), TertiaryColor);
+
         foreach (var it in Simulation.Colliders)
         {
-            Buffer.Data[0] = it.Particles[0].Position;
-            Buffer.Data[1] = it.Particles[1].Position;
-            Buffer.Data[2] = it.Particles[2].Position;
-            Buffer.Flush(3);
+            Buffer.Write(it.Particles[0].Position);
+            Buffer.Write(it.Particles[1].Position);
+            Buffer.Write(it.Particles[2].Position);
+            Buffer.Flush();
 
             GL.CullFace(TriangleFace.Front);
             GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
@@ -177,8 +179,8 @@ internal class Window : GameWindow
         GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref identity);
         GL.Uniform4(Shader.GetUniform("base_color"), SecondaryColor);
 
-        Buffer.Data[0] = Vector3.Zero;
-        Buffer.Flush(1);
+        Buffer.Write(Vector3.Zero);
+        Buffer.Flush();
 
         GL.DrawArrays(PrimitiveType.Points, 0, 1);
 

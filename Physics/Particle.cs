@@ -6,7 +6,7 @@ public class Particle(
     Vector3 position = default,
     Vector3 velocity = default,
     float mass = float.PositiveInfinity,
-    bool hasGravity = true)
+    bool hasGravity = false)
 {
     public Vector3 Position { get; set; } = position;
 

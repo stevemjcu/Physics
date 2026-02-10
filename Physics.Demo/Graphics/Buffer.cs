@@ -10,14 +10,15 @@ internal class Buffer<T>(int length, IList<int> layout) : IDisposable where T : 
     private int VertexArray; // VAO = layout
     private int VertexBuffer; // VBO = data
 
-    public T[] Data { get; } = new T[length];
+    private readonly T[] Data = new T[length];
+    private int Length = 0;
 
     public void Initialize()
     {
         VertexArray = GL.GenVertexArray();
-        GL.BindVertexArray(VertexArray);
-
         VertexBuffer = GL.GenBuffer();
+
+        GL.BindVertexArray(VertexArray);
         GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBuffer);
         GL.BufferData(BufferTarget.ArrayBuffer, length * Stride, 0, BufferUsageHint.DynamicDraw);
 
@@ -30,9 +31,23 @@ internal class Buffer<T>(int length, IList<int> layout) : IDisposable where T : 
         }
     }
 
-    public void Flush(int count)
+    public void Write(T element)
     {
-        GL.BufferSubData(BufferTarget.ArrayBuffer, 0, count * Stride, Data);
+        Data[Length++] = element;
+    }
+
+    public void Write(ReadOnlySpan<T> data)
+    {
+        foreach (var it in data)
+        {
+            Write(it);
+        }
+    }
+
+    public void Flush()
+    {
+        GL.BufferSubData(BufferTarget.ArrayBuffer, 0, Length * Stride, Data);
+        Length = 0;
     }
 
     public void Bind()
