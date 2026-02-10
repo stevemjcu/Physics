@@ -44,7 +44,7 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
 
     public readonly bool Overlaps(Triangle triangle, out float distance)
     {
-        // O + tD = wA + uB + vC
+        // O + tD = (u - v - 1)A + uB + vC
         // => O - A = -Dt + (B - A)u + (C - A)v
         // Creates system of linear equations with unknowns t, u, and v
         // Solved with Cramer's Rule for 0 or 1 solutions
@@ -61,7 +61,7 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
         distance = 0;
         var pvec = Vector3.Cross(Direction, triangle.EdgeAc);
         var det = Vector3.Dot(triangle.EdgeAb, pvec);
-        if (det > float.Epsilon)
+        if (MathF.Abs(det) < float.Epsilon)
         {
             return false;
         }
@@ -82,6 +82,6 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
         }
 
         distance = Vector3.Dot(triangle.EdgeAc, qvec) * invdet;
-        return true;
+        return distance > 0;
     }
 }

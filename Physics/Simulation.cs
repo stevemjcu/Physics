@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using Physics.Shapes;
 
 namespace Physics;
 
@@ -31,19 +32,19 @@ public class Simulation
         }
 
         // Generate collision constraints
-        //foreach (var it in Particles)
-        //{
-        //    foreach (var jt in Colliders)
-        //    {
-        //        var ray = new Ray(it.PreviousPosition, it.Position);
-        //        var length = (it.Position - it.PreviousPosition).Length;
+        foreach (var it in Particles)
+        {
+            foreach (var jt in Colliders)
+            {
+                var ray = new Ray(it.PreviousPosition, it.Position);
+                var length = (it.Position - it.PreviousPosition).Length;
 
-        //        if (ray.Overlaps(jt.Triangle, out var t) && t < length)
-        //        {
-        //            Console.WriteLine($"Collision: {it.Position}");
-        //        }
-        //    }
-        //}
+                if (length > 0 && ray.Overlaps(jt.Triangle, out var t) && t < length)
+                {
+                    Console.WriteLine($"Collision: {t}");
+                }
+            }
+        }
 
         // Solve constraints
         for (var i = 0; i < Iterations; i++)
