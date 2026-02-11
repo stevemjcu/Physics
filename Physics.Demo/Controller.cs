@@ -77,16 +77,5 @@ internal class Controller()
         {
             Simulation.Constraints.Remove(Constraint);
         }
-
-        if (MouseState.IsButtonPressed(MouseButton.Right))
-        {
-            foreach (var it in Simulation.Colliders)
-            {
-                if (Camera.Ray.Overlaps(it.Triangle, out var t))
-                {
-                    Console.WriteLine($"{t} {it.Triangle.Normal}");
-                }
-            }
-        }
     }
 }

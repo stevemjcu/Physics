@@ -2,8 +2,7 @@
 
 namespace Physics.Constraints;
 
-public class DistanceConstraint(
-    Particle source, Particle target, float distance, float stiffness)
+public class DistanceConstraint(Particle source, Particle target, float distance, float stiffness)
     : Constraint([source, target], stiffness)
 {
     public float Distance { get; set; } = distance;

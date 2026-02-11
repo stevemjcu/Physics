@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using Physics.Constraints;
 using Physics.Shapes;
 
 namespace Physics;
@@ -16,6 +17,8 @@ public class Simulation
     public List<Constraint> Constraints { get; set; } = [];
 
     public List<Collider> Colliders { get; set; } = [];
+
+    private readonly List<Constraint> CollisionConstraints = [];
 
     public void Step(float timestep)
     {
@@ -41,7 +44,7 @@ public class Simulation
 
                 if (length > 0 && ray.Overlaps(jt.Triangle, out var t) && t < length)
                 {
-                    Console.WriteLine($"Collision: {t}");
+                    CollisionConstraints.Add(new CollisionConstraint(it, ray.GetPoint(t), jt.Triangle.Normal, 1));
                 }
             }
         }
@@ -53,6 +56,11 @@ public class Simulation
             {
                 it.Project();
             }
+
+            foreach (var it in CollisionConstraints)
+            {
+                it.Project();
+            }
         }
 
         // Derive velocities
@@ -61,5 +69,7 @@ public class Simulation
             it.Velocity = (it.Position - it.PreviousPosition) / timestep;
             it.Velocity *= DampingCoefficient;
         }
+
+        CollisionConstraints.Clear();
     }
 }
