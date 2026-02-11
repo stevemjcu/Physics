@@ -21,6 +21,7 @@ internal class Window : GameWindow
 
     private const int Iterations = 20;
     private const float DampingCoefficient = 0.995f;
+    private const float FrictionCoefficient = 0.9f;
     private const float Gravity = 10f;
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
@@ -43,6 +44,7 @@ internal class Window : GameWindow
         {
             Iterations = Iterations,
             DampingCoefficient = DampingCoefficient,
+            FrictionCoefficient = FrictionCoefficient,
             Gravity = Gravity
         };
 
@@ -89,9 +91,9 @@ internal class Window : GameWindow
             Simulation.Constraints.Add(c);
         }
 
-        var u = new Particle(new(-1, -1, 1));
-        var v = new Particle(new(1, -1, 1));
-        var w = new Particle(new(0, -1, -1));
+        var u = new Particle(new Vector3(-5, -1, 5));
+        var v = new Particle(new Vector3(5, -1, 5));
+        var w = new Particle(new Vector3(0, -1, -5));
         Simulation.Colliders.Add(new() { Particles = [u, w, v] });
     }
 

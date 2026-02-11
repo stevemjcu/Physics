@@ -6,11 +6,13 @@ namespace Physics;
 
 public class Simulation
 {
-    public required int Iterations { get; set; } = 20;
+    public int Iterations { get; set; } = 20;
 
-    public required float DampingCoefficient { get; set; } = 1;
+    public float DampingCoefficient { get; set; } = 1;
 
-    public required float Gravity { get; set; }
+    public float FrictionCoefficient { get; set; } = 1;
+
+    public float Gravity { get; set; } = 10;
 
     public List<Particle> Particles { get; set; } = [];
 
@@ -68,6 +70,11 @@ public class Simulation
         {
             it.Velocity = (it.Position - it.PreviousPosition) / timestep;
             it.Velocity *= DampingCoefficient;
+        }
+
+        foreach (var it in CollisionConstraints)
+        {
+            it.Particles[0].Velocity *= FrictionCoefficient;
         }
 
         CollisionConstraints.Clear();
