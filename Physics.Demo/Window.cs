@@ -72,7 +72,7 @@ internal class Window : GameWindow
         CursorState = CursorState.Grabbed;
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.DepthTest);
-        GL.Enable(EnableCap.CullFace);
+        //GL.Enable(EnableCap.CullFace);
 
         Shader.Compile([PointVertPath, PointFragPath]);
         Buffer.Initialize();
@@ -89,10 +89,10 @@ internal class Window : GameWindow
             Simulation.Constraints.Add(c);
         }
 
-        var u = new Particle(new(-1, 1, 1));
-        var v = new Particle(new(1, 1, 1));
-        var w = new Particle(new(0, 1, -1));
-        Simulation.Colliders.Add(new() { Particles = [u, v, w] });
+        var u = new Particle(new(-1, -1, 1));
+        var v = new Particle(new(1, -1, 1));
+        var w = new Particle(new(0, -1, -1));
+        Simulation.Colliders.Add(new() { Particles = [u, w, v] });
     }
 
     protected override void OnUnload()
@@ -145,6 +145,14 @@ internal class Window : GameWindow
         GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
         GL.Uniform4(Shader.GetUniform("base_color"), PrimaryColor);
 
+        foreach (var it in Simulation.Particles)
+        {
+            Buffer.Write(it.Position);
+            Buffer.Flush();
+
+            GL.DrawArrays(PrimitiveType.Points, 0, 1);
+        }
+
         foreach (var it in Simulation.Constraints)
         {
             if (it is not DistanceConstraint)
@@ -158,7 +166,6 @@ internal class Window : GameWindow
             Buffer.Flush();
 
             GL.DrawArrays(PrimitiveType.LineStrip, 0, 2);
-            GL.DrawArrays(PrimitiveType.Points, 0, 2);
         }
 
         GL.Uniform4(Shader.GetUniform("base_color"), TertiaryColor);

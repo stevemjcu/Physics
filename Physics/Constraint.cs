@@ -2,7 +2,7 @@
 
 namespace Physics;
 
-public abstract class Constraint(Particle[] particles, float stiffness, bool equality = true)
+public abstract class Constraint(Particle[] particles, float stiffness, bool inequality = false)
 {
     public Particle[] Particles { get; set; } = [.. particles];
 
@@ -10,17 +10,19 @@ public abstract class Constraint(Particle[] particles, float stiffness, bool equ
 
     public float Stiffness { get; set; } = stiffness;
 
-    public bool Equality { get; set; } = equality;
+    public bool Inequality { get; set; } = inequality;
 
     public void Project()
     {
         var (error, gradient) = CalculateError();
-        if (!Equality && error < 0)
+
+        if (Inequality && error < 0)
         {
             return;
         }
 
         var factor = CalculateScalingFactor(error, gradient);
+
         if (float.IsInfinity(factor) || float.IsNaN(factor))
         {
             return;

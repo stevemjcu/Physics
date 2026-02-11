@@ -82,6 +82,6 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
         }
 
         distance = Vector3.Dot(triangle.EdgeAc, qvec) * invdet;
-        return distance > 0;
+        return distance >= 0;
     }
 }

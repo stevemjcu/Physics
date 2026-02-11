@@ -18,7 +18,7 @@ public class Simulation
 
     public List<Collider> Colliders { get; set; } = [];
 
-    private readonly List<Constraint> CollisionConstraints = [];
+    public List<CollisionConstraint> CollisionConstraints { get; set; } = [];
 
     public void Step(float timestep)
     {
@@ -42,9 +42,9 @@ public class Simulation
                 var ray = new Ray(it.PreviousPosition, it.Position);
                 var length = (it.Position - it.PreviousPosition).Length;
 
-                if (length > 0 && ray.Overlaps(jt.Triangle, out var t) && t < length)
+                if (ray.Overlaps(jt.Triangle, out var t) && t <= length)
                 {
-                    CollisionConstraints.Add(new CollisionConstraint(it, ray.GetPoint(t), jt.Triangle.Normal, 1));
+                    CollisionConstraints.Add(new(it, ray.GetPoint(t), jt.Triangle.Normal, 1));
                 }
             }
         }
