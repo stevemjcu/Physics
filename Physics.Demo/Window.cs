@@ -21,7 +21,7 @@ internal class Window : GameWindow
 
     private const int Iterations = 20;
     private const float DampingCoefficient = 0.995f;
-    private const float FrictionCoefficient = 0.9f;
+    private const float FrictionCoefficient = 0.95f;
     private const float Gravity = 10f;
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;

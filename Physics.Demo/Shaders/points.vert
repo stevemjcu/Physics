@@ -9,5 +9,5 @@ uniform mat4 projection;
 void main()
 {
     gl_Position = vec4(position, 1.0) * view * projection;
-    depth = gl_Position.z;
+    depth = gl_Position.z + 1;
 }

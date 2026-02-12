@@ -74,7 +74,10 @@ public class Simulation
 
         foreach (var it in CollisionConstraints)
         {
-            it.Particles[0].Velocity *= FrictionCoefficient;
+            var a = Vector3.Dot(it.Particles[0].Velocity, it.Normal) * it.Normal; // along normal
+            var b = (it.Particles[0].Velocity - a) * FrictionCoefficient; // tangential to normal
+
+            it.Particles[0].Velocity = a + b;
         }
 
         CollisionConstraints.Clear();
