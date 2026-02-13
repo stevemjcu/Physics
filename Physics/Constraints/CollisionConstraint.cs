@@ -3,17 +3,17 @@
 namespace Physics.Constraints;
 
 public class CollisionConstraint(Particle source, Vector3 contact, Vector3 normal, float stiffness)
-    : Constraint([source], stiffness, true)
+	: Constraint([source], stiffness, true)
 {
-    public Vector3 Contact { get; set; } = contact;
+	public Vector3 Contact { get; set; } = contact;
 
-    public Vector3 Normal { get; set; } = normal;
+	public Vector3 Normal { get; set; } = normal;
 
-    public override (float Error, Vector3[] Gradient) CalculateError()
-    {
-        var error = Vector3.Dot(Particles[0].Position - Contact, -Normal);
-        Gradient[0] = -Normal;
+	public override (float Error, Vector3[] Gradient) CalculateError()
+	{
+		var error = Vector3.Dot(Particles[0].Position - Contact, -Normal);
+		Gradient[0] = -Normal;
 
-        return (error, Gradient);
-    }
+		return (error, Gradient);
+	}
 }

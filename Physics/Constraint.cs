@@ -4,48 +4,48 @@ namespace Physics;
 
 public abstract class Constraint(Particle[] particles, float stiffness, bool inequality = false)
 {
-    public Particle[] Particles { get; set; } = [.. particles];
+	public Particle[] Particles { get; set; } = [.. particles];
 
-    protected Vector3[] Gradient { get; set; } = new Vector3[particles.Length];
+	protected Vector3[] Gradient { get; set; } = new Vector3[particles.Length];
 
-    public float Stiffness { get; set; } = stiffness;
+	public float Stiffness { get; set; } = stiffness;
 
-    public bool Inequality { get; set; } = inequality;
+	public bool Inequality { get; set; } = inequality;
 
-    public void Project()
-    {
-        var (error, gradient) = CalculateError();
+	public void Project()
+	{
+		var (error, gradient) = CalculateError();
 
-        if (Inequality && error < 0)
-        {
-            return;
-        }
+		if (Inequality && error < 0)
+		{
+			return;
+		}
 
-        var factor = CalculateScalingFactor(error, gradient);
+		var factor = CalculateScalingFactor(error, gradient);
 
-        if (float.IsInfinity(factor) || float.IsNaN(factor))
-        {
-            return;
-        }
+		if (float.IsInfinity(factor) || float.IsNaN(factor))
+		{
+			return;
+		}
 
-        for (var i = 0; i < Particles.Length; i++)
-        {
-            var correction = factor * Stiffness * Particles[i].InverseMass * gradient[i];
-            Particles[i].Position += correction;
-        }
-    }
+		for (var i = 0; i < Particles.Length; i++)
+		{
+			var correction = factor * Stiffness * Particles[i].InverseMass * gradient[i];
+			Particles[i].Position += correction;
+		}
+	}
 
-    public abstract (float Error, Vector3[] Gradient) CalculateError();
+	public abstract (float Error, Vector3[] Gradient) CalculateError();
 
-    public float CalculateScalingFactor(float Error, Vector3[] Gradient)
-    {
-        var denominator = 0f;
+	public float CalculateScalingFactor(float Error, Vector3[] Gradient)
+	{
+		var denominator = 0f;
 
-        for (var i = 0; i < Particles.Length; i++)
-        {
-            denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
-        }
+		for (var i = 0; i < Particles.Length; i++)
+		{
+			denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
+		}
 
-        return -Error / denominator;
-    }
+		return -Error / denominator;
+	}
 }
