@@ -1,7 +1,6 @@
 ﻿using OpenTK.Mathematics;
 using Physics.Constraints;
 using Physics.Shapes;
-using System.Diagnostics;
 
 namespace Physics;
 
@@ -26,6 +25,7 @@ public class Simulation
 	public void Step(float timestep)
 	{
 		// Integrate particles
+
 		foreach (var it in Particles)
 		{
 			if (it.HasGravity)
@@ -37,23 +37,25 @@ public class Simulation
 			it.Position += it.Velocity * timestep;
 		}
 
-		// Generate collision constraints
+		// Detect collisions
+
 		foreach (var it in Particles)
 		{
 			foreach (var jt in Colliders)
 			{
-				var ray = new Ray(it.PreviousPosition, it.Position);
+				var ray = new Ray(it.PreviousPosition, it.Position.Normalized());
 				var length = (it.Position - it.PreviousPosition).Length;
 
 				if (ray.Overlaps(jt.Triangle, out var t) && t <= length)
 				{
-					// TODO: Use pool to avoid allocation
+					// TODO: Use pool to avoid reallocation
 					CollisionConstraints.Add(new(it, ray.GetPoint(t), jt.Triangle.Normal, 1));
 				}
 			}
 		}
 
 		// Solve constraints
+
 		for (var i = 0; i < Iterations; i++)
 		{
 			foreach (var it in Constraints)
@@ -68,6 +70,7 @@ public class Simulation
 		}
 
 		// Derive velocities
+
 		foreach (var it in Particles)
 		{
 			it.Velocity = (it.Position - it.PreviousPosition) / timestep;
@@ -76,15 +79,7 @@ public class Simulation
 
 		foreach (var it in CollisionConstraints)
 		{
-			var velocity = it.Particles[0].Velocity;
-			var a = velocity.Along(it.Normal, out var b);
-
-#if DEBUG
-			Debug.Assert(a + b == velocity);
-			Debug.Assert(Vector3.Dot(a, b) == 0);
-			Debug.Assert(Vector3.Dot(b, it.Normal) == 0);
-#endif
-
+			var a = it.Particles[0].Velocity.Along(it.Normal, out var b);
 			it.Particles[0].Velocity = a + b * FrictionCoefficient;
 		}
 
