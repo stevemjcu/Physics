@@ -12,6 +12,8 @@ public class Particle(
 
 	public Vector3 PreviousPosition { get; set; }
 
+	public Vector3 Displacement => Position - PreviousPosition;
+
 	public Vector3 Velocity { get; set; } = velocity;
 
 	public float Mass { get; set; } = mass;
