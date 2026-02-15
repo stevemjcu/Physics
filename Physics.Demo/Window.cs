@@ -11,188 +11,215 @@ namespace Physics.Demo;
 
 internal class Window : GameWindow
 {
-	private const string PointVertPath = @"Shaders\points.vert";
-	private const string PointFragPath = @"Shaders\points.frag";
-	private const int BufferSize = 16;
+    private const string VertPath = @"Shaders\basic.vert";
+    private const string FragPath = @"Shaders\basic.frag";
+    private const string ModelPath = @"Models\cube.obj";
+    private const int BufferSize = 16;
 
-	private const int VerticalFovDeg = 80;
-	private const float DepthNear = 0.1f;
-	private const float DepthFar = 100f;
+    private const int VerticalFovDeg = 80;
+    private const float DepthNear = 0.1f;
+    private const float DepthFar = 100f;
 
-	private const int Iterations = 20;
-	private const float DampingCoefficient = 0.995f;
-	private const float FrictionCoefficient = 0.95f;
-	private const float Gravity = 10f;
-	private const float FixedTimestep = 1 / 60f;
-	private float Accumulator;
+    private const int Iterations = 20;
+    private const float DampingCoefficient = 0.995f;
+    private const float FrictionCoefficient = 0.93f;
+    private const float Gravity = 10f;
+    private const float FixedTimestep = 1 / 60f;
+    private float Accumulator;
 
-	private static readonly Color4 PrimaryColor = Color4.White;
-	private static readonly Color4 SecondaryColor = Color4.Green;
-	private static readonly Color4 TertiaryColor = Color4.LightBlue;
+    private static readonly Color4 PrimaryColor = Color4.White;
+    private static readonly Color4 SecondaryColor = Color4.Green;
+    private static readonly Color4 TertiaryColor = Color4.LightBlue;
 
-	private readonly Simulation Simulation;
-	private readonly Camera Camera;
-	private readonly Shader Shader;
-	private readonly Buffer<Vector3> Buffer;
-	private readonly Controller Controller;
+    private readonly Simulation Simulation;
+    private readonly Camera Camera;
+    private readonly Shader Shader;
+    private readonly Buffer<Vector3> Buffer;
+    private readonly Model Model;
+    private readonly Controller Controller;
 
-	public Window(
-		GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
-		: base(gameWindowSettings, nativeWindowSettings)
-	{
-		Simulation = new()
-		{
-			Iterations = Iterations,
-			DampingCoefficient = DampingCoefficient,
-			FrictionCoefficient = FrictionCoefficient,
-			Gravity = Gravity
-		};
+    public Window(
+        GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
+        : base(gameWindowSettings, nativeWindowSettings)
+    {
+        Simulation = new()
+        {
+            Iterations = Iterations,
+            DampingCoefficient = DampingCoefficient,
+            FrictionCoefficient = FrictionCoefficient,
+            Gravity = Gravity
+        };
 
-		Camera = new()
-		{
-			VerticalFov = MathHelper.DegreesToRadians(VerticalFovDeg),
-			AspectRatio = Size.X / (float)Size.Y,
-			DepthNear = DepthNear,
-			DepthFar = DepthFar
-		};
+        Camera = new()
+        {
+            VerticalFov = MathHelper.DegreesToRadians(VerticalFovDeg),
+            AspectRatio = Size.X / (float)Size.Y,
+            DepthNear = DepthNear,
+            DepthFar = DepthFar
+        };
 
-		Controller = new()
-		{
-			MouseState = MouseState,
-			KeyboardState = KeyboardState,
-			Camera = Camera,
-			Simulation = Simulation
-		};
+        Controller = new()
+        {
+            MouseState = MouseState,
+            KeyboardState = KeyboardState,
+            Camera = Camera,
+            Simulation = Simulation
+        };
 
-		Shader = new();
-		Buffer = new(BufferSize, [3]);
-	}
+        Shader = new();
+        Buffer = new(BufferSize, [3]);
+        Model = new();
+    }
 
-	protected override void OnLoad()
-	{
-		base.OnLoad();
-		CursorState = CursorState.Grabbed;
-		GL.ClearColor(Color.Black);
-		GL.Enable(EnableCap.DepthTest);
-		//GL.Enable(EnableCap.CullFace);
+    protected override void OnLoad()
+    {
+        base.OnLoad();
+        CursorState = CursorState.Grabbed;
+        GL.ClearColor(Color.Black);
+        GL.Enable(EnableCap.DepthTest);
+        //GL.Enable(EnableCap.CullFace);
 
-		Shader.Compile([PointVertPath, PointFragPath]);
-		Buffer.Initialize();
-		Camera.Position = new(0, 0, 3);
+        Shader.Compile([VertPath, FragPath]);
+        Buffer.Initialize();
+        Camera.Position = new(0, 0, 3);
 
-		var interval = 0.25f;
-		Simulation.Particles.Add(new());
+        LoadModel();
 
-		for (var i = 1; i < 8; i++)
-		{
-			var p = new Particle(new(0, -i * interval, 0), Vector3.Zero, 1, true);
-			var c = new DistanceConstraint(Simulation.Particles[i - 1], p, interval, 0.2f);
-			Simulation.Particles.Add(p);
-			Simulation.Constraints.Add(c);
-		}
+        //var interval = 0.25f;
+        //Simulation.Particles.Add(new(new(0, 1, 0)));
 
-		var u = new Particle(new Vector3(-5, -1, 5));
-		var v = new Particle(new Vector3(5, -1, 5));
-		var w = new Particle(new Vector3(0, -1, -5));
-		Simulation.Colliders.Add(new() { Particles = [u, w, v] });
-	}
+        //for (var i = 1; i < 24; i++)
+        //{
+        //    var p = new Particle(new(0, -i * interval, 0), Vector3.Zero, 1, true);
+        //    var c = new DistanceConstraint(Simulation.Particles[i - 1], p, interval, 0.2f);
+        //    Simulation.Particles.Add(p);
+        //    Simulation.Constraints.Add(c);
+        //}
 
-	protected override void OnUnload()
-	{
-		base.OnUnload();
-		Buffer.Dispose();
-		Shader.Dispose();
-	}
+        var u = new Particle(new Vector3(-100, 0, 100));
+        var v = new Particle(new Vector3(100, 0, 100));
+        var w = new Particle(new Vector3(0, 0, -100));
+        Simulation.Colliders.Add(new() { Particles = [u, w, v] });
+    }
 
-	protected override void OnUpdateFrame(FrameEventArgs args)
-	{
-		base.OnUpdateFrame(args);
+    private void LoadModel()
+    {
+        Model.Import(ModelPath);
+        var particles = new List<Particle>();
 
-		if (!IsFocused)
-		{
-			return;
-		}
+        foreach (var it in Model.Vertices)
+        {
+            particles.Add(new(it, Vector3.Zero, 1, true));
+            Simulation.Particles.Add(particles[^1]);
+        }
 
-		if (KeyboardState.IsKeyDown(Keys.Escape))
-		{
-			Close();
-		}
+        foreach (var it in Model.Faces)
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                var (a, b) = (particles[it[i] - 1], particles[it[(i + 1) % 3] - 1]);
+                var distance = (b.Position - a.Position).Length;
+                Simulation.Constraints.Add(new DistanceConstraint(a, b, distance, 0.025f));
+            }
+        }
+    }
 
-		var timestep = (float)args.Time;
-		Accumulator += timestep;
+    protected override void OnUnload()
+    {
+        base.OnUnload();
+        Buffer.Dispose();
+        Shader.Dispose();
+    }
 
-		while (Accumulator > FixedTimestep)
-		{
-			Simulation.Step(FixedTimestep);
-			Accumulator -= FixedTimestep;
-		}
+    protected override void OnUpdateFrame(FrameEventArgs args)
+    {
+        base.OnUpdateFrame(args);
 
-		Controller.UpdateCamera(timestep);
-		Controller.UpdateGrabber();
-	}
+        if (!IsFocused)
+        {
+            return;
+        }
 
-	protected override void OnRenderFrame(FrameEventArgs args)
-	{
-		base.OnRenderFrame(args);
-		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-		Shader.Use();
-		Buffer.Bind();
+        if (KeyboardState.IsKeyDown(Keys.Escape))
+        {
+            Close();
+        }
 
-		var view = Camera.View;
-		var projection = Camera.Projection;
-		var identity = Matrix4.Identity;
+        var timestep = (float)args.Time;
+        Accumulator += timestep;
 
-		GL.PointSize(4.5f);
-		GL.UniformMatrix4(Shader.GetUniform("view"), true, ref view);
-		GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
-		GL.Uniform4(Shader.GetUniform("base_color"), PrimaryColor);
+        while (Accumulator > FixedTimestep)
+        {
+            Simulation.Step(FixedTimestep);
+            Accumulator -= FixedTimestep;
+        }
 
-		foreach (var it in Simulation.Particles)
-		{
-			Buffer.Write(it.Position);
-			Buffer.Flush();
+        Controller.UpdateCamera(timestep);
+        Controller.UpdateGrabber();
+    }
 
-			GL.DrawArrays(PrimitiveType.Points, 0, 1);
-		}
+    protected override void OnRenderFrame(FrameEventArgs args)
+    {
+        base.OnRenderFrame(args);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        Shader.Use();
+        Buffer.Bind();
 
-		foreach (var it in Simulation.Constraints)
-		{
-			if (it is not DistanceConstraint)
-			{
-				continue;
-			}
+        var view = Camera.View;
+        var projection = Camera.Projection;
+        var identity = Matrix4.Identity;
 
-			// TODO: Interpolate between position and previous position
-			Buffer.Write(it.Particles[0].Position);
-			Buffer.Write(it.Particles[1].Position);
-			Buffer.Flush();
+        GL.PointSize(4.5f);
+        GL.UniformMatrix4(Shader.GetUniform("view"), true, ref view);
+        GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref projection);
+        GL.Uniform4(Shader.GetUniform("base_color"), PrimaryColor);
 
-			GL.DrawArrays(PrimitiveType.LineStrip, 0, 2);
-		}
+        foreach (var it in Simulation.Particles)
+        {
+            Buffer.Write(it.Position);
+            Buffer.Flush();
 
-		GL.Uniform4(Shader.GetUniform("base_color"), TertiaryColor);
+            GL.DrawArrays(PrimitiveType.Points, 0, 1);
+        }
 
-		foreach (var it in Simulation.Colliders)
-		{
-			Buffer.Write(it.Particles[0].Position);
-			Buffer.Write(it.Particles[1].Position);
-			Buffer.Write(it.Particles[2].Position);
-			Buffer.Flush();
+        foreach (var it in Simulation.Constraints)
+        {
+            if (it is not DistanceConstraint)
+            {
+                continue;
+            }
 
-			GL.CullFace(TriangleFace.Front);
-			GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-		}
+            // TODO: Interpolate between position and previous position
+            Buffer.Write(it.Particles[0].Position);
+            Buffer.Write(it.Particles[1].Position);
+            Buffer.Flush();
 
-		GL.PointSize(2.5f);
-		GL.UniformMatrix4(Shader.GetUniform("view"), true, ref identity);
-		GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref identity);
-		GL.Uniform4(Shader.GetUniform("base_color"), SecondaryColor);
+            GL.DrawArrays(PrimitiveType.LineStrip, 0, 2);
+        }
 
-		Buffer.Write(Vector3.Zero);
-		Buffer.Flush();
+        GL.Uniform4(Shader.GetUniform("base_color"), TertiaryColor);
 
-		GL.DrawArrays(PrimitiveType.Points, 0, 1);
+        foreach (var it in Simulation.Colliders)
+        {
+            Buffer.Write(it.Particles[0].Position);
+            Buffer.Write(it.Particles[1].Position);
+            Buffer.Write(it.Particles[2].Position);
+            Buffer.Flush();
 
-		SwapBuffers();
-	}
+            GL.CullFace(TriangleFace.Front);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        }
+
+        GL.PointSize(2.5f);
+        GL.UniformMatrix4(Shader.GetUniform("view"), true, ref identity);
+        GL.UniformMatrix4(Shader.GetUniform("projection"), true, ref identity);
+        GL.Uniform4(Shader.GetUniform("base_color"), SecondaryColor);
+
+        Buffer.Write(Vector3.Zero);
+        Buffer.Flush();
+
+        GL.DrawArrays(PrimitiveType.Points, 0, 1);
+
+        SwapBuffers();
+    }
 }

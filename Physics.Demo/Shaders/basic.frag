@@ -7,5 +7,5 @@ uniform vec4 base_color;
 
 void main()
 {
-    color = base_color / (depth * 1.2);
+    color = base_color / depth;
 }

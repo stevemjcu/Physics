@@ -16,10 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Shaders\points.frag">
+    <None Update="Models\cube.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Shaders\points.vert">
+    <None Update="Shaders\basic.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Shaders\basic.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
