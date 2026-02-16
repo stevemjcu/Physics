@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using Physics.Colliders;
 using Physics.Constraints;
 using Physics.Shapes;
 
@@ -18,7 +19,7 @@ public class Simulation
 
     public List<Constraint> Constraints { get; set; } = [];
 
-    public List<Collider> Colliders { get; set; } = [];
+    public List<TriangleCollider> Colliders { get; set; } = [];
 
     public List<CollisionConstraint> CollisionConstraints { get; set; } = [];
 

@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Physics.Colliders;
 using Physics.Constraints;
 using Physics.Demo.Graphics;
 using System.Drawing;
@@ -99,7 +100,7 @@ internal class Window : GameWindow
         var u = new Particle(new Vector3(-100, 0, 100));
         var v = new Particle(new Vector3(100, 0, 100));
         var w = new Particle(new Vector3(0, 0, -100));
-        Simulation.Colliders.Add(new() { Particles = [u, w, v] });
+        Simulation.Colliders.Add(new TriangleCollider(u, w, v));
     }
 
     private void LoadModel(string path, float mass, float stiffness, Matrix4 transform)
@@ -109,8 +110,10 @@ internal class Window : GameWindow
 
         foreach (var it in model.Vertices)
         {
-            var test = new Vector4(it) * transform;
-            particles.Add(new(test.Xyz, Vector3.Zero, mass, true));
+            // FIXME: Transformations
+            var test = (new Vector4(it) * transform).Xyz;
+            test += new Vector3(0, 5, 0);
+            particles.Add(new(test, Vector3.Zero, mass, true));
             Simulation.Particles.Add(particles[^1]);
         }
 
