@@ -56,7 +56,8 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
         // (c) Check if ray-plane intersection is not behind ray
 
         distance = 0;
-        const float epsilon = 0.05f;
+        const float epsilon0 = 0.00005f;
+        const float epsilon1 = 0.1f;
 
         var edge0 = triangle.EdgeAb;
         var edge1 = triangle.EdgeAc;
@@ -64,7 +65,7 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
         var pvec = Vector3.Cross(UnitDirection, edge1);
         var det = Vector3.Dot(edge0, pvec);
 
-        if (det > -epsilon && det < epsilon)
+        if (det > -epsilon0 && det < epsilon0)
         {
             return false;
         }
@@ -87,6 +88,6 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
         }
 
         distance = Vector3.Dot(edge1, qvec) * idet;
-        return distance >= -epsilon;
+        return distance > -epsilon1;
     }
 }

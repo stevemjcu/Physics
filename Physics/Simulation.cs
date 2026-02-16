@@ -8,9 +8,9 @@ public class Simulation
 {
     public int Iterations { get; set; } = 20;
 
-    public float DampingCoefficient { get; set; } = 1;
+    public float Damping { get; set; } = 1;
 
-    public float FrictionCoefficient { get; set; } = 1;
+    public float Friction { get; set; } = 1;
 
     public float Gravity { get; set; } = 10;
 
@@ -74,13 +74,13 @@ public class Simulation
         foreach (var it in Particles)
         {
             it.Velocity = it.Displacement / timestep;
-            it.Velocity *= DampingCoefficient;
+            it.Velocity *= Damping;
         }
 
         foreach (var it in CollisionConstraints)
         {
             var a = it.Particles[0].Velocity.Along(it.Normal, out var b);
-            it.Particles[0].Velocity = a + b * FrictionCoefficient;
+            it.Particles[0].Velocity = a + b * Friction;
         }
 
         CollisionConstraints.Clear();

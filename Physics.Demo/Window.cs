@@ -21,8 +21,8 @@ internal class Window : GameWindow
     private const float DepthFar = 100f;
 
     private const int Iterations = 20;
-    private const float DampingCoefficient = 0.995f;
-    private const float FrictionCoefficient = 0.93f;
+    private const float Damping = 0.995f;
+    private const float Friction = 0.9f;
     private const float Gravity = 10f;
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
@@ -35,7 +35,6 @@ internal class Window : GameWindow
     private readonly Camera Camera;
     private readonly Shader Shader;
     private readonly Buffer<Vector3> Buffer;
-    private readonly Model Model;
     private readonly Controller Controller;
 
     public Window(
@@ -45,8 +44,8 @@ internal class Window : GameWindow
         Simulation = new()
         {
             Iterations = Iterations,
-            DampingCoefficient = DampingCoefficient,
-            FrictionCoefficient = FrictionCoefficient,
+            Damping = Damping,
+            Friction = Friction,
             Gravity = Gravity
         };
 
@@ -68,7 +67,6 @@ internal class Window : GameWindow
 
         Shader = new();
         Buffer = new(BufferSize, [3]);
-        Model = new();
     }
 
     protected override void OnLoad()
@@ -79,11 +77,13 @@ internal class Window : GameWindow
         GL.Enable(EnableCap.DepthTest);
         //GL.Enable(EnableCap.CullFace);
 
+        var scale = Matrix4.CreateScale(0.5f);
+        var translation = Matrix4.CreateTranslation(new Vector3(0, 10, 0));
+
         Shader.Compile([VertPath, FragPath]);
         Buffer.Initialize();
-        Camera.Position = new(0, 0, 3);
-
-        LoadModel();
+        Camera.Position = new(0, 1, 3);
+        LoadModel(ModelPath, 1, 1, scale);
 
         //var interval = 0.25f;
         //Simulation.Particles.Add(new(new(0, 1, 0)));
@@ -102,25 +102,31 @@ internal class Window : GameWindow
         Simulation.Colliders.Add(new() { Particles = [u, w, v] });
     }
 
-    private void LoadModel()
+    private void LoadModel(string path, float mass, float stiffness, Matrix4 transform)
     {
-        Model.Import(ModelPath);
+        var model = Model.Import(path);
         var particles = new List<Particle>();
 
-        foreach (var it in Model.Vertices)
+        foreach (var it in model.Vertices)
         {
-            particles.Add(new(it, Vector3.Zero, 1, true));
+            var test = new Vector4(it) * transform;
+            particles.Add(new(test.Xyz, Vector3.Zero, mass, true));
             Simulation.Particles.Add(particles[^1]);
         }
 
-        foreach (var it in Model.Faces)
+        foreach (var it in model.Faces)
         {
             for (var i = 0; i < 3; i++)
             {
                 var (a, b) = (particles[it[i] - 1], particles[it[(i + 1) % 3] - 1]);
                 var distance = (b.Position - a.Position).Length;
-                Simulation.Constraints.Add(new DistanceConstraint(a, b, distance, 0.025f));
+                Simulation.Constraints.Add(new DistanceConstraint(a, b, distance, stiffness));
             }
+
+            //var u = particles[it[0] - 1];
+            //var v = particles[it[1] - 1];
+            //var w = particles[it[2] - 1];
+            //Simulation.Colliders.Add(new TriangleCollider(u, v, w));
         }
     }
 
