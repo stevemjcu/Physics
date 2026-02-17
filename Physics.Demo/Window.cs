@@ -97,9 +97,9 @@ internal class Window : GameWindow
         //    Simulation.Constraints.Add(c);
         //}
 
-        var u = new Particle(new Vector3(-100, 0, 100));
-        var v = new Particle(new Vector3(100, 0, 100));
-        var w = new Particle(new Vector3(0, 0, -100));
+        var u = new Particle(new Vector3(-10, 0, 10));
+        var v = new Particle(new Vector3(10, 0, 10));
+        var w = new Particle(new Vector3(0, 0, -10));
         Simulation.Colliders.Add(new TriangleCollider(u, w, v));
     }
 

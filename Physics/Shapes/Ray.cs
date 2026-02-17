@@ -3,13 +3,15 @@
 namespace Physics.Shapes;
 
 // P = O + tD
-public record struct Ray(Vector3 Origin, Vector3 Direction)
+public struct Ray(Vector3 origin, Vector3 direction)
 {
-    public Vector3 UnitDirection = Direction.Normalized();
+    public Vector3 Origin { get; set; } = origin;
+
+    public Vector3 Direction { get; set; } = direction.Normalized();
 
     public readonly Vector3 GetPoint(float distance)
     {
-        return Origin + distance * UnitDirection;
+        return Origin + distance * Direction;
     }
 
     public readonly bool Overlaps(Sphere sphere, out float distance)
@@ -20,7 +22,7 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
         // Solved with quadratic formula for 0, 1, or 2 solutions
 
         var a = 1;
-        var b = Vector3.Dot(2 * UnitDirection, Origin - sphere.Center);
+        var b = Vector3.Dot(2 * Direction, Origin - sphere.Center);
         var c = (Origin - sphere.Center).LengthSquared - sphere.Radius * sphere.Radius;
         var d = b * b - 4 * a * c;
 
@@ -57,12 +59,12 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
 
         distance = 0;
         const float epsilon0 = 0.00005f;
-        const float epsilon1 = 0.1f;
+        const float epsilon1 = 0.005f;
 
         var edge0 = triangle.EdgeAb;
         var edge1 = triangle.EdgeAc;
 
-        var pvec = Vector3.Cross(UnitDirection, edge1);
+        var pvec = Vector3.Cross(Direction, edge1);
         var det = Vector3.Dot(edge0, pvec);
 
         if (det > -epsilon0 && det < epsilon0)
@@ -80,7 +82,7 @@ public record struct Ray(Vector3 Origin, Vector3 Direction)
         }
 
         var qvec = Vector3.Cross(tvec, edge0);
-        var v = Vector3.Dot(UnitDirection, qvec) * idet;
+        var v = Vector3.Dot(Direction, qvec) * idet;
 
         if (v < 0 || u + v > 1)
         {
