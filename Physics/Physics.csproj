@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Constraints\ShapeConstraint.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="OpenTK.Mathematics" Version="4.9.4" />
   </ItemGroup>
 

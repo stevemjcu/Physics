@@ -1,8 +1,7 @@
 ﻿using OpenTK.Mathematics;
-using Physics.Colliders;
 using Physics.Constraints;
 
-namespace Physics.Utility;
+namespace Physics.Demo;
 
 internal class Model
 {
@@ -34,7 +33,7 @@ internal class Model
         return model;
     }
 
-    public void Load(Simulation simulation, float mass, float stiffness, bool gravity, Matrix4 transform)
+    public void Load(Simulation simulation, Particle template, float stiffness, Matrix4 transform)
     {
         var particles = new List<Particle>();
 
@@ -42,7 +41,7 @@ internal class Model
         {
             // FIXME: Transformations
             var position = (new Vector4(it) * transform).Xyz;
-            particles.Add(new(position, Vector3.Zero, mass, gravity));
+            particles.Add(new(position, Vector3.Zero, template.Mass, template.HasGravity));
             simulation.Particles.Add(particles[^1]);
         }
 
@@ -55,10 +54,10 @@ internal class Model
                 simulation.Constraints.Add(new DistanceConstraint(a, b, distance, stiffness));
             }
 
-            var u = particles[it[0]];
-            var v = particles[it[1]];
-            var w = particles[it[2]];
-            simulation.Colliders.Add(new TriangleCollider(u, v, w));
+            //var u = particles[it[0]];
+            //var v = particles[it[1]];
+            //var w = particles[it[2]];
+            //simulation.Colliders.Add(new TriangleCollider(u, v, w));
         }
     }
 }

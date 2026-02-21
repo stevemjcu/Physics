@@ -14,14 +14,14 @@ internal class Window : GameWindow
 {
     private const string VertPath = @"Shaders\basic.vert";
     private const string FragPath = @"Shaders\basic.frag";
-    private const string ModelPath = @"Models\cube.obj";
+    private const string ModelPath = @"Models\cube2.obj";
     private const int BufferSize = 16;
 
     private const int VerticalFovDeg = 80;
     private const float DepthNear = 0.1f;
     private const float DepthFar = 100f;
 
-    private const int Iterations = 20;
+    private const int Iterations = 40;
     private const float Damping = 0.995f;
     private const float Friction = 0.9f;
     private const float Gravity = 10f;
@@ -84,7 +84,9 @@ internal class Window : GameWindow
         Shader.Compile([VertPath, FragPath]);
         Buffer.Initialize();
         Camera.Position = new(0, 1, 3);
-        LoadModel(ModelPath, 1, 1, scale);
+
+        var model = Model.Import(ModelPath);
+        model.Load(Simulation, new(default, 1, true), 1, scale * translation);
 
         //var interval = 0.25f;
         //Simulation.Particles.Add(new(new(0, 1, 0)));
@@ -101,36 +103,6 @@ internal class Window : GameWindow
         var v = new Particle(new Vector3(10, 0, 10));
         var w = new Particle(new Vector3(0, 0, -10));
         Simulation.Colliders.Add(new TriangleCollider(u, w, v));
-    }
-
-    private void LoadModel(string path, float mass, float stiffness, Matrix4 transform)
-    {
-        var model = Model.Import(path);
-        var particles = new List<Particle>();
-
-        foreach (var it in model.Vertices)
-        {
-            // FIXME: Transformations
-            var test = (new Vector4(it) * transform).Xyz;
-            test += new Vector3(0, 5, 0);
-            particles.Add(new(test, Vector3.Zero, mass, true));
-            Simulation.Particles.Add(particles[^1]);
-        }
-
-        foreach (var it in model.Faces)
-        {
-            for (var i = 0; i < 3; i++)
-            {
-                var (a, b) = (particles[it[i] - 1], particles[it[(i + 1) % 3] - 1]);
-                var distance = (b.Position - a.Position).Length;
-                Simulation.Constraints.Add(new DistanceConstraint(a, b, distance, stiffness));
-            }
-
-            //var u = particles[it[0] - 1];
-            //var v = particles[it[1] - 1];
-            //var w = particles[it[2] - 1];
-            //Simulation.Colliders.Add(new TriangleCollider(u, v, w));
-        }
     }
 
     protected override void OnUnload()

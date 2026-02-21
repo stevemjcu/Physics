@@ -4,6 +4,10 @@ namespace Physics;
 
 public class Particle(Vector3 position, Vector3 velocity, float mass, bool gravity)
 {
+    public Particle(Vector3 position, float mass, bool gravity) : this(position, default, mass, gravity) { }
+
+    public Particle(Vector3 position) : this(position, float.PositiveInfinity, false) { }
+
     public Vector3 Position { get; set; } = position;
 
     public Vector3 PreviousPosition { get; set; }
