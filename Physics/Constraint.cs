@@ -4,48 +4,59 @@ namespace Physics;
 
 public abstract class Constraint(Particle[] particles, float stiffness, bool inequality = false)
 {
-	public Particle[] Particles { get; set; } = [.. particles];
+    public Particle[] Particles { get; set; } = [.. particles];
 
-	protected Vector3[] Gradient { get; set; } = new Vector3[particles.Length];
+    public float Stiffness { get; set; } = stiffness;
 
-	public float Stiffness { get; set; } = stiffness;
+    public bool Inequality { get; set; } = inequality;
 
-	public bool Inequality { get; set; } = inequality;
+    public float Error { get; protected set; }
 
-	public void Project()
-	{
-		var (error, gradient) = CalculateError();
+    public Vector3[] Gradient { get; protected set; } = new Vector3[particles.Length];
 
-		if (Inequality && error < 0)
-		{
-			return;
-		}
+    public float ScalingFactor
+    {
+        get
+        {
+            var denominator = 0f;
 
-		var factor = CalculateScalingFactor(error, gradient);
+            for (var i = 0; i < Particles.Length; i++)
+            {
+                denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
+            }
 
-		if (float.IsInfinity(factor) || float.IsNaN(factor))
-		{
-			return;
-		}
+            return -Error / denominator;
+        }
+    }
 
-		for (var i = 0; i < Particles.Length; i++)
-		{
-			var correction = factor * Stiffness * Particles[i].InverseMass * gradient[i];
-			Particles[i].Position += correction;
-		}
-	}
+    public void Project()
+    {
+        CalculateError();
 
-	public abstract (float Error, Vector3[] Gradient) CalculateError();
+        if (Inequality && Error < 0)
+        {
+            return;
+        }
 
-	public float CalculateScalingFactor(float Error, Vector3[] Gradient)
-	{
-		var denominator = 0f;
+        var factor = ScalingFactor;
 
-		for (var i = 0; i < Particles.Length; i++)
-		{
-			denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
-		}
+        if (float.IsInfinity(factor) || float.IsNaN(factor))
+        {
+            return;
+        }
 
-		return -Error / denominator;
-	}
+        for (var i = 0; i < Particles.Length; i++)
+        {
+            var correction = factor * Stiffness * Particles[i].InverseMass * Gradient[i];
+            Particles[i].Position += correction;
+        }
+    }
+
+    /// <summary>
+    /// Updates <see cref="Error"/> and <see cref="Gradient"/> based on current particle positions. 
+    /// </summary>
+    /// <remarks>
+    /// Called automatically by <see cref="Project"/>.
+    /// </remarks>
+    public abstract void CalculateError();
 }
