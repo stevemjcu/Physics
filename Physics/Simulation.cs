@@ -81,6 +81,12 @@ public class Simulation
         foreach (var it in CollisionConstraints)
         {
             var a = it.Particles[0].Velocity.Along(it.Normal, out var b);
+
+            if (Vector3.Dot(a, it.Normal) < 0)
+            {
+                a *= -1; // Restitution
+            }
+
             it.Particles[0].Velocity = a + b * Friction;
         }
 

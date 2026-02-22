@@ -14,7 +14,7 @@ internal class Window : GameWindow
 {
     private const string VertPath = @"Shaders\basic.vert";
     private const string FragPath = @"Shaders\basic.frag";
-    private const string ModelPath = @"Models\cube2.obj";
+    private const string ModelPath = @"Models\cube.obj";
     private const int BufferSize = 16;
 
     private const int VerticalFovDeg = 80;
@@ -23,7 +23,7 @@ internal class Window : GameWindow
 
     private const int Iterations = 40;
     private const float Damping = 0.995f;
-    private const float Friction = 0.9f;
+    private const float Friction = 0.95f;
     private const float Gravity = 10f;
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
@@ -86,7 +86,7 @@ internal class Window : GameWindow
         Camera.Position = new(0, 1, 3);
 
         var model = Model.Import(ModelPath);
-        model.Load(Simulation, new(default, 1, true), 1, scale * translation);
+        model.Load(Simulation, new(default, 1, true), 0.025f, scale * translation);
 
         //var interval = 0.25f;
         //Simulation.Particles.Add(new(new(0, 1, 0)));
