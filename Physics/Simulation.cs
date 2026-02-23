@@ -7,11 +7,15 @@ namespace Physics;
 
 public class Simulation
 {
-    public int Iterations { get; set; } = 20;
+    public int Substeps { get; set; } = 5;
 
-    public float Damping { get; set; } = 1;
+    public int Iterations { get; set; } = 5;
 
-    public float Friction { get; set; } = 1;
+    public float Damping { get; set; } = 0.9999f;
+
+    public float Friction { get; set; } = 0.95f;
+
+    public float Restitution { get; set; } = 0.95f;
 
     public float Gravity { get; set; } = 10;
 
@@ -25,71 +29,75 @@ public class Simulation
 
     public void Step(float timestep)
     {
-        // Integrate particles
+        timestep /= Substeps;
 
-        foreach (var it in Particles)
+        for (var i = 0; i < Substeps; i++)
         {
-            if (it.HasGravity)
+            // Integrate particles
+
+            foreach (var it in Particles)
             {
-                it.Velocity += Vector3.Zero with { Y = -Gravity } * timestep;
+                if (it.HasGravity)
+                {
+                    it.Velocity += Vector3.Zero with { Y = -Gravity } * timestep;
+                }
+
+                it.PreviousPosition = it.Position;
+                it.Position += it.Velocity * timestep;
             }
 
-            it.PreviousPosition = it.Position;
-            it.Position += it.Velocity * timestep;
-        }
+            // Detect collisions
 
-        // Detect collisions
-
-        foreach (var it in Particles)
-        {
-            foreach (var jt in Colliders)
+            foreach (var it in Particles)
             {
-                var ray = new Ray(it.PreviousPosition, it.Displacement);
-                var length = it.Displacement.Length;
-
-                if (ray.Overlaps(jt.Triangle, out var t) && t <= length)
+                foreach (var jt in Colliders)
                 {
-                    // TODO: Use pool to avoid reallocation
-                    CollisionConstraints.Add(new(it, ray.GetPoint(t), jt.Triangle.Normal, 1));
+                    var ray = new Ray(it.PreviousPosition, it.Displacement);
+                    var length = it.Displacement.Length;
+
+                    if (ray.Overlaps(jt.Triangle, out var t) && t <= length)
+                    {
+                        // TODO: Use pool to avoid reallocation
+                        CollisionConstraints.Add(new(it, ray.GetPoint(t), jt.Triangle.Normal, 1));
+                    }
                 }
             }
-        }
 
-        // Solve constraints
+            // Solve constraints
 
-        for (var i = 0; i < Iterations; i++)
-        {
-            foreach (var it in Constraints)
+            for (var j = 0; j < Iterations; j++)
             {
-                it.Project();
+                foreach (var it in Constraints)
+                {
+                    it.Project();
+                }
+
+                foreach (var it in CollisionConstraints)
+                {
+                    it.Project();
+                }
+            }
+
+            // Derive velocities
+
+            foreach (var it in Particles)
+            {
+                it.Velocity = (it.Displacement / timestep) * Damping;
             }
 
             foreach (var it in CollisionConstraints)
             {
-                it.Project();
-            }
-        }
+                var a = it.Particles[0].Velocity.Along(it.Normal, out var b);
 
-        // Derive velocities
+                if (Vector3.Dot(a, it.Normal) < 0)
+                {
+                    a *= -Restitution;
+                }
 
-        foreach (var it in Particles)
-        {
-            it.Velocity = it.Displacement / timestep;
-            it.Velocity *= Damping;
-        }
-
-        foreach (var it in CollisionConstraints)
-        {
-            var a = it.Particles[0].Velocity.Along(it.Normal, out var b);
-
-            if (Vector3.Dot(a, it.Normal) < 0)
-            {
-                a *= -1; // Restitution
+                it.Particles[0].Velocity = a + b * Friction;
             }
 
-            it.Particles[0].Velocity = a + b * Friction;
+            CollisionConstraints.Clear();
         }
-
-        CollisionConstraints.Clear();
     }
 }

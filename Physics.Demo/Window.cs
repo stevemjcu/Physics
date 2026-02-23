@@ -21,10 +21,6 @@ internal class Window : GameWindow
     private const float DepthNear = 0.1f;
     private const float DepthFar = 100f;
 
-    private const int Iterations = 40;
-    private const float Damping = 0.995f;
-    private const float Friction = 0.95f;
-    private const float Gravity = 10f;
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
 
@@ -42,13 +38,7 @@ internal class Window : GameWindow
         GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
         : base(gameWindowSettings, nativeWindowSettings)
     {
-        Simulation = new()
-        {
-            Iterations = Iterations,
-            Damping = Damping,
-            Friction = Friction,
-            Gravity = Gravity
-        };
+        Simulation = new();
 
         Camera = new()
         {
