@@ -7,11 +7,11 @@ namespace Physics;
 
 public class Simulation
 {
-    public int Substeps { get; set; } = 5;
+    public int Substeps { get; set; } = 20;
 
-    public int Iterations { get; set; } = 5;
+    public int Iterations { get; set; } = 1;
 
-    public float Damping { get; set; } = 0.9999f;
+    public float Damping { get; set; } = 0.99995f;
 
     public float Friction { get; set; } = 0.95f;
 
@@ -58,7 +58,7 @@ public class Simulation
                     if (ray.Overlaps(jt.Triangle, out var t) && t <= length)
                     {
                         // TODO: Use pool to avoid reallocation
-                        CollisionConstraints.Add(new(it, ray.GetPoint(t), jt.Triangle.Normal, 1));
+                        CollisionConstraints.Add(new(it, ray.GetPoint(t), jt.Triangle.Normal, 0));
                     }
                 }
             }
@@ -69,12 +69,12 @@ public class Simulation
             {
                 foreach (var it in Constraints)
                 {
-                    it.Project();
+                    it.Project(timestep);
                 }
 
                 foreach (var it in CollisionConstraints)
                 {
-                    it.Project();
+                    it.Project(timestep);
                 }
             }
 

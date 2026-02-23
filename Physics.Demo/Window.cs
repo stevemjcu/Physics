@@ -76,7 +76,7 @@ internal class Window : GameWindow
         Camera.Position = new(0, 1, 3);
 
         var model = Model.Import(ModelPath);
-        model.Load(Simulation, new(default, 1, true), 0.025f, scale * translation);
+        model.Load(Simulation, new(default, 1, true), 0, scale * translation);
 
         //var interval = 0.25f;
         //Simulation.Particles.Add(new(new(0, 1, 0)));
@@ -89,9 +89,9 @@ internal class Window : GameWindow
         //    Simulation.Constraints.Add(c);
         //}
 
-        var u = new Particle(new Vector3(-10, 0, 10));
-        var v = new Particle(new Vector3(10, 0, 10));
-        var w = new Particle(new Vector3(0, 0, -10));
+        var u = new Particle(new Vector3(-1, 0, 1) * 30);
+        var v = new Particle(new Vector3(1, 0, 1) * 30);
+        var w = new Particle(new Vector3(0, 0, -1) * 30);
         Simulation.Colliders.Add(new TriangleCollider(u, w, v));
     }
 

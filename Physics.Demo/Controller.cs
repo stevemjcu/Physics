@@ -16,7 +16,7 @@ internal class Controller()
     public required Camera Camera;
     public required Simulation Simulation;
 
-    private readonly DistanceConstraint Constraint = new(new(Vector3.Zero, 10, false), null!, 0, 0.1f);
+    private readonly DistanceConstraint Constraint = new(new(Vector3.Zero, 50, false), null!, 0, 0.001f);
     private float ArmLength;
 
     public void UpdateCamera(float timestep)

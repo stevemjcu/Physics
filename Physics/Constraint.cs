@@ -2,11 +2,11 @@
 
 namespace Physics;
 
-public abstract class Constraint(Particle[] particles, float stiffness, bool inequality = false)
+public abstract class Constraint(Particle[] particles, float compliance, bool inequality = false)
 {
     public Particle[] Particles { get; set; } = [.. particles];
 
-    public float Stiffness { get; set; } = stiffness;
+    public float Compliance { get; set; } = compliance;
 
     public bool Inequality { get; set; } = inequality;
 
@@ -14,22 +14,7 @@ public abstract class Constraint(Particle[] particles, float stiffness, bool ine
 
     public Vector3[] Gradient { get; protected set; } = new Vector3[particles.Length];
 
-    public float ScalingFactor
-    {
-        get
-        {
-            var denominator = 0f;
-
-            for (var i = 0; i < Particles.Length; i++)
-            {
-                denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
-            }
-
-            return -Error / denominator;
-        }
-    }
-
-    public void Project()
+    public void Project(float timestep)
     {
         CalculateError();
 
@@ -38,7 +23,15 @@ public abstract class Constraint(Particle[] particles, float stiffness, bool ine
             return;
         }
 
-        var factor = ScalingFactor;
+        var denominator = 0f;
+
+        for (var i = 0; i < Particles.Length; i++)
+        {
+            denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
+        }
+
+        var x = Compliance / (timestep * timestep);
+        var factor = -Error / (denominator + x);
 
         if (float.IsInfinity(factor) || float.IsNaN(factor))
         {
@@ -47,7 +40,7 @@ public abstract class Constraint(Particle[] particles, float stiffness, bool ine
 
         for (var i = 0; i < Particles.Length; i++)
         {
-            var correction = factor * Stiffness * Particles[i].InverseMass * Gradient[i];
+            var correction = factor * Particles[i].InverseMass * Gradient[i];
             Particles[i].Position += correction;
         }
     }

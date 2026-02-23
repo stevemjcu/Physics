@@ -2,8 +2,8 @@
 
 namespace Physics.Constraints;
 
-public class CollisionConstraint(Particle source, Vector3 contact, Vector3 normal, float stiffness)
-    : Constraint([source], stiffness, true)
+public class CollisionConstraint(Particle source, Vector3 contact, Vector3 normal, float compliance)
+    : Constraint([source], compliance, true)
 {
     public Vector3 Contact { get; set; } = contact;
 
