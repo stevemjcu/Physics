@@ -89,9 +89,9 @@ internal class Window : GameWindow
         //    Simulation.Constraints.Add(c);
         //}
 
-        var u = new Particle(new Vector3(-1, 0, 1) * 30);
-        var v = new Particle(new Vector3(1, 0, 1) * 30);
-        var w = new Particle(new Vector3(0, 0, -1) * 30);
+        var u = new Particle(new Vector3(-1, 0, 1) * 5000);
+        var v = new Particle(new Vector3(1, 0, 1) * 5000);
+        var w = new Particle(new Vector3(0, 0, -1) * 5000);
         Simulation.Colliders.Add(new TriangleCollider(u, w, v));
     }
 

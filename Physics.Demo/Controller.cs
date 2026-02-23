@@ -16,7 +16,7 @@ internal class Controller()
     public required Camera Camera;
     public required Simulation Simulation;
 
-    private readonly DistanceConstraint Constraint = new(new(Vector3.Zero, 50, false), null!, 0, 0.001f);
+    private readonly DistanceConstraint Constraint = new(new(Vector3.Zero, 10, false), null!, 0, 0.01f);
     private float ArmLength;
 
     public void UpdateCamera(float timestep)
@@ -37,7 +37,9 @@ internal class Controller()
         var y = KeyboardState.GetInputAxis(Keys.LeftControl, Keys.Space);
         var z = KeyboardState.GetInputAxis(Keys.W, Keys.S);
 
-        var distance = CameraSpeed * timestep;
+        var modifier = KeyboardState.IsKeyDown(Keys.LeftShift) ? 4 : 1;
+
+        var distance = CameraSpeed * modifier * timestep;
         Camera.Position += new Vector3(x, 0, z) * Matrix3.CreateRotationY(angle) * distance;
         Camera.Position += new Vector3(0, y, 0) * distance;
     }

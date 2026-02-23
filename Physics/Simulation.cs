@@ -7,7 +7,7 @@ namespace Physics;
 
 public class Simulation
 {
-    public int Substeps { get; set; } = 20;
+    public int Substeps { get; set; } = 30;
 
     public int Iterations { get; set; } = 1;
 
@@ -15,7 +15,7 @@ public class Simulation
 
     public float Friction { get; set; } = 0.95f;
 
-    public float Restitution { get; set; } = 0.95f;
+    public float Restitution { get; set; } = 1;
 
     public float Gravity { get; set; } = 10;
 
