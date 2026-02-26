@@ -21,6 +21,13 @@ internal class Window : GameWindow
     private const float DepthNear = 0.1f;
     private const float DepthFar = 100f;
 
+    private readonly int Substeps = 5;
+    private readonly float Damping = 0.99995f;
+    private readonly float Friction = 0.95f;
+    private readonly float Restitution = 1;
+    private readonly float Gravity = 10;
+    private readonly float Compliance = 0; // 0 = stiff
+
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
 
@@ -38,7 +45,14 @@ internal class Window : GameWindow
         GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
         : base(gameWindowSettings, nativeWindowSettings)
     {
-        Simulation = new();
+        Simulation = new()
+        {
+            Substeps = Substeps,
+            Damping = Damping,
+            Friction = Friction,
+            Restitution = Restitution,
+            Gravity = Gravity,
+        };
 
         Camera = new()
         {
@@ -76,7 +90,7 @@ internal class Window : GameWindow
         Camera.Position = new(0, 1, 3);
 
         var model = Model.Import(ModelPath);
-        model.Load(Simulation, new(default, 1, true), 0, scale * translation);
+        model.Load(Simulation, new(default, 1, true), Compliance, scale * translation);
 
         //var interval = 0.25f;
         //Simulation.Particles.Add(new(new(0, 1, 0)));
