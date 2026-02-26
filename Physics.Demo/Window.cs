@@ -26,7 +26,7 @@ internal class Window : GameWindow
     private readonly float Friction = 0.95f;
     private readonly float Restitution = 1;
     private readonly float Gravity = 10;
-    private readonly float Compliance = 0; // 0 = stiff
+    private readonly float Compliance = 0.001f; // 0 = stiff
 
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;

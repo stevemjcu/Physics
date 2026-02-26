@@ -44,6 +44,13 @@ public class Simulation
                 it.Position += it.Velocity * timestep;
             }
 
+            // Solve constraints
+
+            foreach (var it in Constraints)
+            {
+                it.Project(timestep);
+            }
+
             // Detect collisions
 
             foreach (var it in Particles)
@@ -60,13 +67,6 @@ public class Simulation
                         CollisionConstraints.Add(new(it, ray.GetPoint(t), jt.Triangle.Normal, 0));
                     }
                 }
-            }
-
-            // Solve constraints
-
-            foreach (var it in Constraints)
-            {
-                it.Project(timestep);
             }
 
             foreach (var it in CollisionConstraints)
