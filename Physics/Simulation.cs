@@ -50,8 +50,9 @@ public class Simulation
             {
                 foreach (var jt in Colliders)
                 {
-                    var ray = new Ray(it.PreviousPosition, it.Displacement);
-                    var length = it.Displacement.Length;
+                    var displacement = it.Position - it.PreviousPosition;
+                    var ray = new Ray(it.PreviousPosition, displacement);
+                    var length = displacement.Length;
 
                     if (ray.Overlaps(jt.Triangle, out var t) && t <= length)
                     {
@@ -77,7 +78,7 @@ public class Simulation
 
             foreach (var it in Particles)
             {
-                it.Velocity = (it.Displacement / timestep) * Damping;
+                it.Velocity = (it.Position - it.PreviousPosition) / timestep * Damping;
             }
 
             foreach (var it in CollisionConstraints)
