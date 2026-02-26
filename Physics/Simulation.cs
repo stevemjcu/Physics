@@ -9,8 +9,6 @@ public class Simulation
 {
     public int Substeps { get; set; } = 30;
 
-    public int Iterations { get; set; } = 1;
-
     public float Damping { get; set; } = 0.99995f;
 
     public float Friction { get; set; } = 0.95f;
@@ -65,17 +63,14 @@ public class Simulation
 
             // Solve constraints
 
-            for (var j = 0; j < Iterations; j++)
+            foreach (var it in Constraints)
             {
-                foreach (var it in Constraints)
-                {
-                    it.Project(timestep);
-                }
+                it.Project(timestep);
+            }
 
-                foreach (var it in CollisionConstraints)
-                {
-                    it.Project(timestep);
-                }
+            foreach (var it in CollisionConstraints)
+            {
+                it.Project(timestep);
             }
 
             // Derive velocities
