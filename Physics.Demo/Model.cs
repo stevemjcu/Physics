@@ -33,7 +33,7 @@ internal class Model
         return model;
     }
 
-    public void Load(Simulation simulation, Particle template, float compliance, Matrix4 transform)
+    public void Load(Simulation simulation, Particle template, float compliance, float damping, Matrix4 transform)
     {
         var particles = new List<Particle>();
 
@@ -51,7 +51,8 @@ internal class Model
             {
                 var (a, b) = (particles[it[i]], particles[it[(i + 1) % 3]]);
                 var distance = (b.Position - a.Position).Length;
-                simulation.Constraints.Add(new DistanceConstraint(a, b, distance, compliance));
+                var constraint = new DistanceConstraint(a, b, distance, compliance) { Damping = damping };
+                simulation.Constraints.Add(constraint);
             }
 
             //var u = particles[it[0]];

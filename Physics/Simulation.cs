@@ -25,6 +25,14 @@ public class Simulation
 
     public List<CollisionConstraint> CollisionConstraints { get; set; } = [];
 
+    public void Reset()
+    {
+        Particles = [];
+        Constraints = [];
+        Colliders = [];
+        CollisionConstraints = [];
+    }
+
     public void Step(float timestep)
     {
         timestep /= Substeps;
@@ -80,6 +88,13 @@ public class Simulation
             {
                 it.Velocity = (it.Position - it.PreviousPosition) / timestep * Damping;
             }
+
+            foreach (var it in Constraints)
+            {
+                it.Dampen(timestep);
+            }
+
+            // Apply friction/restitution
 
             foreach (var it in CollisionConstraints)
             {

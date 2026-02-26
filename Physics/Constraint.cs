@@ -8,6 +8,8 @@ public abstract class Constraint(Particle[] particles, float compliance, bool in
 
     public float Compliance { get; set; } = compliance;
 
+    public float Damping { get; set; } = 0;
+
     public bool Inequality { get; set; } = inequality;
 
     public float Error { get; protected set; }
@@ -23,25 +25,37 @@ public abstract class Constraint(Particle[] particles, float compliance, bool in
             return;
         }
 
-        var denominator = 0f;
+        var denominator = Compliance / (timestep * timestep);
 
         for (var i = 0; i < Particles.Length; i++)
         {
             denominator += Particles[i].InverseMass * Gradient[i].LengthSquared;
         }
 
-        var x = Compliance / (timestep * timestep);
-        var factor = -Error / (denominator + x);
-
-        if (float.IsInfinity(factor) || float.IsNaN(factor))
-        {
-            return;
-        }
+        var scalingFactor = -Error / denominator;
 
         for (var i = 0; i < Particles.Length; i++)
         {
-            var correction = factor * Particles[i].InverseMass * Gradient[i];
+            var correction = scalingFactor * Particles[i].InverseMass * Gradient[i];
             Particles[i].Position += correction;
+        }
+    }
+
+    public void Dampen(float timestep)
+    {
+        var average = Vector3.Zero;
+
+        foreach (var it in Particles)
+        {
+            average += it.Velocity;
+        }
+
+        average /= Particles.Length;
+
+        foreach (var it in Particles)
+        {
+            var correction = (average - it.Velocity) * timestep * Damping;
+            it.Velocity += correction;
         }
     }
 
