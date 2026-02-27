@@ -17,10 +17,10 @@ public class ShapeConstraint(Particle[] particles, float compliance)
         // And gradient by direction of displacement
 
         // To align target:
-        // (a) Move target to source average position
-        // (b) Rotate target by source average angle (relative to target)
+        // (a) Move target by source's average displacement from target
+        // (b) Rotate target by source's average rotation from target
 
-        var displacement = AveragePosition() - Origin;
+        var displacement = AverageDisplacement();
         Origin += displacement;
 
         for (var i = 0; i < Particles.Length; i++)
@@ -28,7 +28,7 @@ public class ShapeConstraint(Particle[] particles, float compliance)
             Target[i] += displacement;
         }
 
-        var angle = AverageAngle();
+        var rotation = AverageRotation();
 
         for (var i = 0; i < Particles.Length; i++)
         {
@@ -37,7 +37,7 @@ public class ShapeConstraint(Particle[] particles, float compliance)
         }
     }
 
-    private Vector3 AveragePosition()
+    private Vector3 AverageDisplacement()
     {
         var sum = Vector3.Zero;
 
@@ -46,10 +46,10 @@ public class ShapeConstraint(Particle[] particles, float compliance)
             sum += it.Position;
         }
 
-        return sum / Particles.Length;
+        return sum / Particles.Length - Origin;
     }
 
-    private Vector3 AverageAngle()
+    private Vector3 AverageRotation()
     {
         return default;
     }

@@ -59,7 +59,7 @@ public class Simulation
                 it.Project(timestep);
             }
 
-            // Detect collisions
+            // Solve collision constraints
 
             foreach (var it in Particles)
             {
@@ -93,8 +93,6 @@ public class Simulation
             {
                 it.Dampen(timestep);
             }
-
-            // Apply friction/restitution
 
             foreach (var it in CollisionConstraints)
             {

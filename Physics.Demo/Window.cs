@@ -21,13 +21,13 @@ internal class Window : GameWindow
     private const float DepthFar = 100f;
 
     private readonly int Substeps = 30;
-    private readonly float Damping = 1;
+    private readonly float Damping = 0.99995f;
     private readonly float Friction = 0.99f;
     private readonly float Restitution = 1;
     private readonly float Gravity = 10;
 
     private readonly float ModelCompliance = 0.001f; // 0 = stiff
-    private readonly float ModelDamping = 0.01f; // 0 = none
+    private readonly float ModelDamping = 0.001f; // 0 = none
 
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
@@ -91,11 +91,16 @@ internal class Window : GameWindow
         Buffer.Initialize();
         Simulation.Reset();
 
-        Camera.Position = new(0, 1, 3);
+        Camera.Position = new(0, 3, 3);
         Camera.Rotation = Vector3.Zero;
 
         var model = Model.Import(ModelPath);
         model.Load(Simulation, new(default, 1, true), ModelCompliance, ModelDamping, scale * translation);
+
+        var u = new Particle(new Vector3(-1, 0, 1) * 5000);
+        var v = new Particle(new Vector3(1, 0, 1) * 5000);
+        var w = new Particle(new Vector3(0, 0, -1) * 5000);
+        Simulation.Colliders.Add(new(u, w, v));
 
         //var interval = 0.25f;
         //Simulation.Particles.Add(new(new(0, 1, 0)));
@@ -103,15 +108,10 @@ internal class Window : GameWindow
         //for (var i = 1; i < 24; i++)
         //{
         //    var p = new Particle(new(0, -i * interval, 0), Vector3.Zero, 1, true);
-        //    var c = new DistanceConstraint(Simulation.Particles[i - 1], p, interval, 0.2f);
+        //    var c = new DistanceConstraint(Simulation.Particles[i - 1], p, interval, 0);
         //    Simulation.Particles.Add(p);
         //    Simulation.Constraints.Add(c);
         //}
-
-        var u = new Particle(new Vector3(-1, 0, 1) * 5000);
-        var v = new Particle(new Vector3(1, 0, 1) * 5000);
-        var w = new Particle(new Vector3(0, 0, -1) * 5000);
-        Simulation.Colliders.Add(new(u, w, v));
     }
 
     protected override void OnUnload()

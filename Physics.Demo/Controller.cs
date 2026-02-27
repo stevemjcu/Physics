@@ -6,7 +6,7 @@ using Physics.Shapes;
 
 namespace Physics.Demo;
 
-internal class Controller()
+internal class Controller
 {
     private const float MouseSensitivity = 0.0015f;
     private const float CameraSpeed = 3.5f;
