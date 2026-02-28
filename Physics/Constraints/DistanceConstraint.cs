@@ -5,7 +5,7 @@ public class DistanceConstraint(Particle source, Particle target, float distance
 {
     public float Distance { get; set; } = distance;
 
-    public override void CalculateError()
+    public override void RecalculateError()
     {
         var displacement = Particles[0].Position - Particles[1].Position;
         var distance = displacement.Length;

@@ -9,7 +9,7 @@ public class CollisionConstraint(Particle source, Vector3 contact, Vector3 norma
 
     public Vector3 Normal { get; set; } = normal;
 
-    public override void CalculateError()
+    public override void RecalculateError()
     {
         Error = Vector3.Dot(Particles[0].Position - Contact, -Normal);
         Gradient[0] = -Normal;

@@ -56,6 +56,7 @@ public class Simulation
 
             foreach (var it in Constraints)
             {
+                it.RecalculateError();
                 it.Project(timestep);
             }
 
@@ -79,6 +80,7 @@ public class Simulation
 
             foreach (var it in CollisionConstraints)
             {
+                it.RecalculateError();
                 it.Project(timestep);
             }
 

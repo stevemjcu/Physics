@@ -9,7 +9,7 @@ public class ShapeConstraint(Particle[] particles, float compliance)
 
     public Vector3 Origin { get; set; }
 
-    public override void CalculateError()
+    public override void RecalculateError()
     {
         // The target has an arbitrary position and orientation
         // Need to align target configuration with source configuration

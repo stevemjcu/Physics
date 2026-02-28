@@ -11,7 +11,7 @@ public class DihedralConstraint(Particle a, Particle b, Particle c, Particle d, 
 {
     public float Angle { get; set; } = angle;
 
-    public override void CalculateError()
+    public override void RecalculateError()
     {
         var source = new Triangle(a.Position, c.Position, b.Position);
         var target = new Triangle(a.Position, b.Position, d.Position);
