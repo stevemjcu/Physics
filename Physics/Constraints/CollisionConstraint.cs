@@ -3,7 +3,7 @@
 namespace Physics.Constraints;
 
 public class CollisionConstraint(Particle source, Vector3 contact, Vector3 normal, float compliance)
-    : Constraint([source], compliance, true)
+    : Constraint([source], compliance, -1)
 {
     public Vector3 Contact { get; set; } = contact;
 
