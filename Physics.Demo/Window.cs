@@ -20,9 +20,9 @@ internal class Window : GameWindow
     private const float DepthNear = 0.1f;
     private const float DepthFar = 100f;
 
-    private readonly int Substeps = 30;
+    private readonly int Substeps = 10;
     private readonly float Damping = 0.99995f;
-    private readonly float Friction = 0.99f;
+    private readonly float Friction = 0.98f;
     private readonly float Restitution = 1;
     private readonly float Gravity = 10;
 
@@ -85,7 +85,7 @@ internal class Window : GameWindow
         GL.Enable(EnableCap.CullFace);
 
         var scale = Matrix4.CreateScale(0.5f);
-        var translation = Matrix4.CreateTranslation(new Vector3(0, 10, 0)); // FIXME
+        var translation = Matrix4.CreateTranslation(new Vector3(0, 1, 0));
 
         Shader.Compile([VertPath, FragPath]);
         Buffer.Initialize();
@@ -95,6 +95,7 @@ internal class Window : GameWindow
         Camera.Rotation = Vector3.Zero;
 
         var model = Model.Import(ModelPath);
+        model.Load(Simulation, new(default, 1, true), ModelCompliance, ModelDamping, scale * translation);
         model.Load(Simulation, new(default, 1, true), ModelCompliance, ModelDamping, scale * translation);
 
         var u = new Particle(new Vector3(-1, 0, 1) * 5000);

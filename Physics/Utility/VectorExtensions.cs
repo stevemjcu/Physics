@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Physics;
+namespace Physics.Utility;
 
 public static class VectorExtensions
 {

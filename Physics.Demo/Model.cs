@@ -1,5 +1,6 @@
 ﻿using OpenTK.Mathematics;
 using Physics.Constraints;
+using Physics.Utility;
 
 namespace Physics.Demo;
 
@@ -39,8 +40,7 @@ internal class Model
 
         foreach (var it in Vertices)
         {
-            // FIXME: Transformations
-            var position = (new Vector4(it) * transform).Xyz;
+            var position = (new Vector4(it, 1) * transform).Xyz;
             particles.Add(new(position, Vector3.Zero, template.Mass, template.HasGravity));
             simulation.Particles.Add(particles[^1]);
         }
