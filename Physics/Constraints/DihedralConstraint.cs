@@ -15,18 +15,12 @@ public class DihedralConstraint(Particle a, Particle b, Particle c, Particle d, 
     {
         var source = new Triangle(a.Position, c.Position, b.Position);
         var target = new Triangle(a.Position, b.Position, d.Position);
-        var angle = Vector3.CalculateAngle(source.Normal, target.Normal);
+        Error = Vector3.CalculateAngle(source.Normal, target.Normal) - Angle;
 
-        // C and D should move along CD (opposite directions)
-        // A and B should move perpendicular to CD and AB (same direction)
-
-        var ab = b.Position - a.Position;
-        var cd = d.Position - c.Position;
-
-        Error = angle - Angle;
-        Gradient[0] = Vector3.Cross(ab, cd);
-        Gradient[1] = Gradient[0];
-        Gradient[2] = cd;
-        Gradient[3] = -Gradient[2];
+        // TODO: Set gradient
+        Gradient[0] = Vector3.Zero;
+        Gradient[1] = Vector3.Zero;
+        Gradient[2] = Vector3.Zero;
+        Gradient[3] = Vector3.Zero;
     }
 }
