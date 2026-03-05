@@ -7,8 +7,8 @@ namespace Physics;
 /// </summary>
 /// <param name="particles">The participating particles.</param>
 /// <param name="compliance">The inverse stiffness.</param>
-/// <param name="equality">The type.</param>
-public abstract class Constraint(Particle[] particles, float compliance, int equality = 0)
+/// <param name="type">The type.</param>
+public abstract class Constraint(Particle[] particles, float compliance, int type = 0)
 {
     /// <summary>
     /// The particles participating in the constraint.
@@ -28,10 +28,10 @@ public abstract class Constraint(Particle[] particles, float compliance, int equ
     public float Damping { get; set; } = 0;
 
     /// <summary>
-    /// The type of the constraint, indicating how it is satisfied.
+    /// The type of the constraint indicating how it is satisfied.
     /// </summary>
-    /// <remarks>0 is equality and -1 or 1 is inequality.</remarks>
-    public int Equality { get; set; } = equality;
+    /// <remarks>0 is equality and +1/-1 is inequality.</remarks>
+    public int Type { get; set; } = type;
 
     /// <summary>
     /// The current error shared by all particles.
@@ -54,7 +54,7 @@ public abstract class Constraint(Particle[] particles, float compliance, int equ
     /// <param name="timestep">The time elapsed since the last call.</param>
     public void Project(float timestep)
     {
-        if (Equality * Error > 0)
+        if (Type * Error > 0)
         {
             return;
         }
@@ -76,11 +76,13 @@ public abstract class Constraint(Particle[] particles, float compliance, int equ
     }
 
     /// <summary>
-    /// Corrects the velocity of each particle to better follow their overall motion.
+    /// Corrects the velocity of each particle to better follow the overall motion.
     /// </summary>
     /// <param name="timestep">The time elapsed since the last call.</param>
     public void Dampen(float timestep)
     {
+        // FIXME: This probably (definitely) isn't correct
+
         var average = Vector3.Zero;
 
         foreach (var it in Particles)
