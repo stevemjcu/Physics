@@ -33,7 +33,7 @@ internal class Window : GameWindow
     private float Accumulator;
 
     private static readonly Color4 PrimaryColor = Color4.White;
-    private static readonly Color4 SecondaryColor = Color4.Green;
+    private static readonly Color4 SecondaryColor = Color4.LimeGreen;
     private static readonly Color4 TertiaryColor = Color4.LightSlateGray;
 
     private readonly Simulation Simulation;
