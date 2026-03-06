@@ -60,5 +60,32 @@ internal class Model
             //var w = particles[it[2]];
             //simulation.Colliders.Add(new TriangleCollider(u, v, w));
         }
+
+        for (var i = 0; i < Faces.Count; i++)
+        {
+            for (var j = i + 1; j < Faces.Count; j++)
+            {
+                var it = Faces[i];
+                var jt = Faces[j];
+
+                var indices = (List<int>)[it.X, it.Y, it.Z, jt.X, jt.Y, jt.Z];
+                var set = indices.Distinct().ToList();
+
+                if (set.Count == 4)
+                {
+                    var cd = set.Where(it => indices.Count(jt => jt == it) == 1).ToList();
+                    var ab = set.Where(it => !cd.Contains(it)).ToList();
+
+                    var a = particles[ab[0]];
+                    var b = particles[ab[1]];
+                    var c = particles[cd[0]];
+                    var d = particles[cd[1]];
+
+                    var distance = (c.Position - d.Position).Length;
+                    var constraint = new DistanceConstraint(c, d, distance, compliance) { DebugDraw = false };
+                    simulation.Constraints.Add(constraint);
+                }
+            }
+        }
     }
 }

@@ -43,6 +43,10 @@ public abstract class Constraint(Particle[] particles, float compliance, int typ
     /// </summary>
     protected Vector3[] Gradient { get; set; } = new Vector3[particles.Length];
 
+#if DEBUG
+    public bool DebugDraw { get; set; } = true;
+#endif
+
     /// <summary>
     /// Updates <see cref="Error"/> and <see cref="Gradient"/> based on current particle positions and weights. 
     /// </summary>

@@ -26,7 +26,7 @@ internal class Window : GameWindow
     private readonly float Restitution = 1;
     private readonly float Gravity = 10;
 
-    private readonly float ModelCompliance = 0.001f; // 0 = stiff
+    private readonly float ModelCompliance = 0.008f; // 0 = stiff
     private readonly float ModelDamping = 0f; // 0 = none
 
     private const float FixedTimestep = 1 / 60f;
@@ -170,7 +170,7 @@ internal class Window : GameWindow
 
         foreach (var it in Simulation.Constraints)
         {
-            if (it is not DistanceConstraint)
+            if (it is not DistanceConstraint || !it.DebugDraw)
             {
                 continue;
             }
