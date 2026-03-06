@@ -34,7 +34,7 @@ internal class Window : GameWindow
 
     private static readonly Color4 PrimaryColor = Color4.White;
     private static readonly Color4 SecondaryColor = Color4.Green;
-    private static readonly Color4 TertiaryColor = Color4.LightBlue;
+    private static readonly Color4 TertiaryColor = Color4.LightSlateGray;
 
     private readonly Simulation Simulation;
     private readonly Camera Camera;
