@@ -13,7 +13,7 @@ internal class Window : GameWindow
 {
     private const string VertPath = @"Shaders\basic.vert";
     private const string FragPath = @"Shaders\basic.frag";
-    private const string ModelPath = @"Models\cube.obj";
+    private const string ModelPath = @"Models\cube-tri-1.obj";
     private const int BufferSize = 16;
 
     private const int VerticalFovDeg = 80;
