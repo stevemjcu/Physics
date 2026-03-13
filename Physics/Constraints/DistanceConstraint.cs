@@ -3,6 +3,13 @@
 public class DistanceConstraint(Particle source, Particle target, float distance, float compliance)
     : Constraint([source, target], compliance)
 {
+    public DistanceConstraint(Particle a, Particle b, float compliance)
+        : this(a, b, 0, compliance)
+    {
+        RecalculateError();
+        Distance = Error;
+    }
+
     public float Distance { get; set; } = distance;
 
     public override void RecalculateError()

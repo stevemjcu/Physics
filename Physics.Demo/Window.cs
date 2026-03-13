@@ -28,6 +28,7 @@ internal class Window : GameWindow
 
     private readonly float ModelCompliance = 0.008f; // 0 = stiff
     private readonly float ModelDamping = 0f; // 0 = none
+    private readonly float ModelMass = 10f;
 
     private const float FixedTimestep = 1 / 60f;
     private float Accumulator;
@@ -95,7 +96,7 @@ internal class Window : GameWindow
         Camera.Rotation = Vector3.Zero;
 
         var model = Model.Import(ModelPath);
-        model.Load(Simulation, new(default, 1, true), ModelCompliance, ModelDamping, scale * translation);
+        model.Load(Simulation, ModelMass, ModelCompliance, ModelDamping, scale * translation);
 
         var u = new Particle(new Vector3(-1, 0, 1) * 5000);
         var v = new Particle(new Vector3(1, 0, 1) * 5000);
